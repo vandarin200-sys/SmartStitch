@@ -7,6 +7,7 @@ const Busboy = require('busboy');
 
 const { configured, missingEnv, createUploadSession } = require('./lib/r2');
 const {
+  gridShape,
   parseSettings,
   processInputGroups,
   naturalCompare,
@@ -181,6 +182,7 @@ async function handleProcess(req, res) {
     }
 
     const settings = parseSettings(parsed.fields);
+    const grid = settings.grid_mode === 'count' ? gridShape(settings.image_count) : null;
     const postKey = String(parsed.fields.postprocess_app || '').trim();
     const postArgs = String(parsed.fields.postprocess_args || '');
 
@@ -241,6 +243,8 @@ async function handleProcess(req, res) {
       'Cache-Control': 'no-store',
       'X-Job-Id': jobId,
       'X-Processed-Slices': String(result.outputs.length),
+      'X-Grid-Mode': settings.grid_mode,
+      'X-Grid-Shape': grid ? grid.rows + 'x' + grid.cols : '',
       'X-Input-Dirs': String(result.stats.groups),
       'X-Process-Ms': String(Date.now() - started),
       'X-R2-Deleted': String(cleaned.deleted),

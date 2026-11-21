@@ -10,7 +10,8 @@ var busy = false;
 var KEY = 'smartstitch_web_profiles_v1';
 var defaultSettings = {
   profile_name:'Settings Profile 1',
-  direction:'vertical', split_height:5000, output_type:'.tga', lossy_quality:100,
+  direction:'vertical', grid_mode:'custom', image_count:4,
+  split_height:5000, output_type:'.tga', lossy_quality:100,
   detector_type:1, senstivity:90, ignorable_pixels:5, scan_step:5,
   enforce_type:2, enforce_width:720, run_postprocess:false,
   postprocess_app:'', postprocess_args:'', last_browse_location:''
@@ -23,6 +24,8 @@ function normalizeProfile(p){
   var s = Object.assign({},defaultSettings,p&&p.settings?p.settings:null,p);
   s.profile_name = s.profile_name || s.name || defaultSettings.profile_name;
   s.direction = s.direction === 'horizontal' ? 'horizontal' : 'vertical';
+  s.grid_mode = s.grid_mode === 'count' ? 'count' : 'custom';
+  s.image_count = Math.round(clamp(+s.image_count,1,1000,defaultSettings.image_count));
   s.output_type = s.output_type || defaultSettings.output_type;
   s.split_height = clamp(+s.split_height,1,999999999,defaultSettings.split_height);
   s.lossy_quality = clamp(+s.lossy_quality,1,100,defaultSettings.lossy_quality);
@@ -53,6 +56,8 @@ function val(v,d){ return (v==null||v==='')?d:v; }
 function readSettings(){
   return {
     direction:$('direction').value,
+    grid_mode:$('gridMode').value,
+    image_count:Math.round(clamp(+$('imageCount').value,1,1000,4)),
     output_type:$('outputType').value,
     lossy_quality:clamp(+$('quality').value,1,100,100),
     split_height:clamp(+$('height').value,1,999999999,5000),
@@ -70,6 +75,8 @@ function readSettings(){
 function writeSettings(s){
   s = s || defaultSettings;
   $('direction').value = s.direction === 'horizontal' ? 'horizontal' : 'vertical';
+  $('gridMode').value = s.grid_mode === 'count' ? 'count' : 'custom';
+  $('imageCount').value = val(s.image_count,4);
   $('outputType').value = val(s.output_type,'.tga');
   $('quality').value = val(s.lossy_quality,100);
   $('height').value = val(s.split_height,5000);
@@ -109,11 +116,18 @@ function updateFmtHint(){
 }
 function updateDirectionLabels(){
   var horizontal = $('direction').value === 'horizontal';
-  if($('directionHint')) $('directionHint').textContent = horizontal
-    ? (files.length === 2
-      ? 'Mode horizontal: 2 gambar — gambar ke-2 otomatis mengikuti ukuran gambar pertama.'
-      : 'Mode horizontal meresizing tinggi dan memotong sepanjang lebar.')
-    : 'Mode vertikal meresizing lebar dan memotong sepanjang tinggi.';
+  if($('directionHint')){
+    var countMode = $('gridMode') && $('gridMode').value === 'count';
+    $('directionHint').textContent = countMode
+      ? (horizontal
+        ? 'Image Count: gambar digabung kiri/kanan, lalu grid dipotong otomatis.'
+        : 'Image Count: gambar digabung atas/bawah, lalu grid dipotong otomatis.')
+      : (horizontal
+        ? (files.length === 2
+          ? 'Mode horizontal: 2 gambar — gambar ke-2 otomatis mengikuti ukuran gambar pertama.'
+          : 'Mode horizontal meresizing tinggi dan memotong sepanjang lebar.')
+        : 'Mode vertikal meresizing lebar dan memotong sepanjang tinggi.');
+  }
   if($('heightLabel')) $('heightLabel').textContent = horizontal ? 'Rough Output Width' : 'Rough Output Height';
   if($('heightHint')) $('heightHint').textContent = horizontal
     ? 'Perkiraan lebar tiap potongan (split_height).'
@@ -123,8 +137,44 @@ function updateDirectionLabels(){
     ? 'Manual Custom Height [pixel]'
     : 'Manual Custom Width [pixel]';
 }
+function gridShapeFor(count){
+  var n=Math.round(clamp(+count,1,1000,4));
+  var best=null;
+  for(var rows=1;rows*rows<=n;rows++){
+    if(n%rows!==0) continue;
+    if(rows===1&&n>2) continue;
+    var cols=n/rows, diff=cols-rows;
+    if(!best||diff<best.diff) best={rows:rows,cols:cols,diff:diff};
+  }
+  if(best){
+    var exactCols=[];
+    for(var i=0;i<best.rows;i++) exactCols.push(best.cols);
+    return {rows:best.rows,cols:best.cols,columnsPerRow:exactCols,exact:true,count:n};
+  }
+  var nearRows=Math.max(1,Math.round(Math.sqrt(n)));
+  var nearCols=Math.ceil(n/nearRows);
+  var columnsPerRow=[], remaining=n;
+  for(var r=0;r<nearRows;r++){
+    var rowCols=Math.ceil(remaining/(nearRows-r));
+    columnsPerRow.push(rowCols);
+    remaining-=rowCols;
+  }
+  return {rows:nearRows,cols:nearCols,columnsPerRow:columnsPerRow,exact:false,count:n};
+}
+function updateGridModeFields(){
+  var countMode=$('gridMode') && $('gridMode').value==='count';
+  if($('customGridFields')) $('customGridFields').style.display=countMode?'none':'grid';
+  if($('countGridFields')) $('countGridFields').style.display=countMode?'grid':'none';
+  if($('gridShapePreview')){
+    var shape=gridShapeFor($('imageCount')?$('imageCount').value:4);
+    $('gridShapePreview').textContent = shape.exact
+      ? shape.count+' gambar → '+shape.rows+'×'+shape.cols+' (baris×kolom)'
+      : shape.count+' gambar → '+shape.rows+' baris, kolom per baris: '+shape.columnsPerRow.join(', ');
+  }
+}
 function syncConditional(){
   updateDirectionLabels();
+  updateGridModeFields();
   $('customWrap').style.display = ($('enforce').value==='2')?'flex':'none';
   $('smartOpts').style.display = ($('detector').value==='1')?'grid':'none';
   var post = $('runPost').checked;
@@ -212,7 +262,7 @@ function enhanceSelect(el){
   el.addEventListener('change',render);
   render();
 }
-function enhanceSelects(){ ['direction','outputType','enforce','detector','profileSelect','postprocessApp'].forEach(function(id){ var el=$(id); if(el && !el.classList.contains('ss-native')) enhanceSelect(el); }); }
+function enhanceSelects(){ ['direction','gridMode','outputType','enforce','detector','profileSelect','postprocessApp'].forEach(function(id){ var el=$(id); if(el && !el.classList.contains('ss-native')) enhanceSelect(el); }); }
 document.addEventListener('click',closeAllSelects);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAllSelects(); });
 
@@ -246,9 +296,10 @@ $('delProfile').addEventListener('click',function(){
   renderProfiles(); writeSettings(cur()); toast('Profil dihapus.');
 });
 function saveSettingsToProfile(){ Object.assign(cur(),readSettings()); store.current=current; saveStore(); }
-['direction','outputType','quality','height','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','runPost','postprocessApp','postprocessArgs'].forEach(function(id){
+['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','runPost','postprocessApp','postprocessArgs'].forEach(function(id){
   $(id).addEventListener('change',function(){ syncConditional(); updateFmtHint(); saveSettingsToProfile(); });
 });
+if($('imageCount')) $('imageCount').addEventListener('input',function(){ updateGridModeFields(); });
 
 $('start').addEventListener('click',function(){ if(!busy) run(); });
 
@@ -259,6 +310,8 @@ function formDataFor(s){
     else fd.append('files',f.file,f.name);
   });
   fd.append('direction',s.direction||'vertical');
+  fd.append('grid_mode',s.grid_mode||'custom');
+  fd.append('image_count',String(s.image_count||4));
   fd.append('output_type',s.output_type);
   fd.append('lossy_quality',String(s.lossy_quality));
   fd.append('split_height',String(s.split_height));

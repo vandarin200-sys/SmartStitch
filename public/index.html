@@ -75,21 +75,42 @@
                   <div class="ss-hint">Berlaku untuk JPG, WEBP &amp; TIFF.</div>
                 </div>
                 <div class="ss-field">
-                  <label for="height" id="heightLabel">Rough Output Height</label>
-                  <input type="number" id="height" min="1" max="999999999" value="5000"/>
-                  <div class="ss-hint" id="heightHint">Tinggi perkiraan tiap potongan (split_height).</div>
-                </div>
-                <div class="ss-field">
-                  <label for="enforce" id="enforceLabel">Width Enforcement Type</label>
-                  <select id="enforce">
-                    <option value="0">No Enforcement</option>
-                    <option value="1">Automatic Uniform Size</option>
-                    <option value="2">User Customized Size</option>
+                  <label for="gridMode">Grid Mode</label>
+                  <select id="gridMode">
+                    <option value="custom">Custom Grid — atur Height &amp; Width sendiri</option>
+                    <option value="count">Image Count — tentukan jumlah gambar</option>
                   </select>
+                  <div class="ss-hint">Custom Grid memakai pengaturan tinggi/lebar. Image Count menghitung grid otomatis.</div>
                 </div>
-                <div class="ss-field" id="customWrap" style="display:none">
-                  <label for="customWidth" id="customWidthLabel">Manual Custom Width [pixel]</label>
-                  <input type="number" id="customWidth" min="1" max="999999999" value="720"/>
+                <div class="ss-grid" id="customGridFields" style="grid-column:1/-1">
+                  <div class="ss-field">
+                    <label for="height" id="heightLabel">Rough Output Height</label>
+                    <input type="number" id="height" min="1" max="999999999" value="5000"/>
+                    <div class="ss-hint" id="heightHint">Tinggi perkiraan tiap potongan (split_height).</div>
+                  </div>
+                  <div class="ss-field">
+                    <label for="enforce" id="enforceLabel">Width Enforcement Type</label>
+                    <select id="enforce">
+                      <option value="0">No Enforcement</option>
+                      <option value="1">Automatic Uniform Size</option>
+                      <option value="2">User Customized Size</option>
+                    </select>
+                  </div>
+                  <div class="ss-field" id="customWrap" style="display:none">
+                    <label for="customWidth" id="customWidthLabel">Manual Custom Width [pixel]</label>
+                    <input type="number" id="customWidth" min="1" max="999999999" value="720"/>
+                  </div>
+                </div>
+                <div class="ss-grid" id="countGridFields" style="display:none;grid-column:1/-1">
+                  <div class="ss-field">
+                    <label for="imageCount">Jumlah Gambar Output</label>
+                    <input type="number" id="imageCount" min="1" max="1000" value="4"/>
+                    <div class="ss-hint">Jumlah potongan akhir dari kanvas gabungan.</div>
+                  </div>
+                  <div class="ss-field">
+                    <label>Pembagian Grid Otomatis</label>
+                    <div class="ss-hint" id="gridShapePreview">4 gambar → 2×2 (baris×kolom)</div>
+                  </div>
                 </div>
               </div>
             </fieldset>
