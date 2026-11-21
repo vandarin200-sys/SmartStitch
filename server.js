@@ -334,7 +334,7 @@ async function handleProcess(req, res) {
     }
 
     const settings = parseSettings(fields);
-    const grid = settings.grid_mode === 'count' ? gridShape(settings.image_count) : null;
+    const grid = settings.grid_mode === 'count' ? gridShape(settings.image_count, settings.direction) : null;
     const postKey = String(fields.postprocess_app || '').trim();
     const postArgs = String(fields.postprocess_args || '');
 

@@ -120,8 +120,8 @@ function updateDirectionLabels(){
     var countMode = $('gridMode') && $('gridMode').value === 'count';
     $('directionHint').textContent = countMode
       ? (horizontal
-        ? 'Image Count: gambar digabung kiri/kanan, lalu grid dipotong otomatis.'
-        : 'Image Count: gambar digabung atas/bawah, lalu grid dipotong otomatis.')
+        ? 'Image Count: gambar digabung kiri/kanan; grid lebih banyak kolom.'
+        : 'Image Count: gambar digabung atas/bawah; grid lebih banyak baris.')
       : (horizontal
         ? (files.length === 2
           ? 'Mode horizontal: 2 gambar — gambar ke-2 otomatis mengikuti ukuran gambar pertama.'
@@ -137,39 +137,45 @@ function updateDirectionLabels(){
     ? 'Manual Custom Height [pixel]'
     : 'Manual Custom Width [pixel]';
 }
-function gridShapeFor(count){
+function gridShapeFor(count,direction){
   var n=Math.round(clamp(+count,1,1000,4));
+  var vertical=(direction||'vertical')!=='horizontal';
   var best=null;
-  for(var rows=1;rows*rows<=n;rows++){
-    if(n%rows!==0) continue;
-    if(rows===1&&n>2) continue;
-    var cols=n/rows, diff=cols-rows;
-    if(!best||diff<best.diff) best={rows:rows,cols:cols,diff:diff};
+  for(var smaller=1;smaller*smaller<=n;smaller++){
+    if(n%smaller!==0) continue;
+    if(smaller===1&&n>2) continue;
+    var larger=n/smaller, diff=larger-smaller;
+    if(!best||diff<best.diff) best={smaller:smaller,larger:larger,diff:diff};
   }
+  var rows, cols;
   if(best){
-    var exactCols=[];
-    for(var i=0;i<best.rows;i++) exactCols.push(best.cols);
-    return {rows:best.rows,cols:best.cols,columnsPerRow:exactCols,exact:true,count:n};
+    rows=vertical?best.larger:best.smaller;
+    cols=vertical?best.smaller:best.larger;
+  }else{
+    var side=Math.max(1,Math.round(Math.sqrt(n)));
+    var other=Math.ceil(n/side);
+    rows=vertical?other:side;
+    cols=vertical?side:other;
   }
-  var nearRows=Math.max(1,Math.round(Math.sqrt(n)));
-  var nearCols=Math.ceil(n/nearRows);
   var columnsPerRow=[], remaining=n;
-  for(var r=0;r<nearRows;r++){
-    var rowCols=Math.ceil(remaining/(nearRows-r));
+  for(var r=0;r<rows;r++){
+    var rowCols=Math.ceil(remaining/(rows-r));
     columnsPerRow.push(rowCols);
     remaining-=rowCols;
   }
-  return {rows:nearRows,cols:nearCols,columnsPerRow:columnsPerRow,exact:false,count:n};
+  var maxCols=Math.max.apply(null,columnsPerRow);
+  return {rows:rows,cols:maxCols,columnsPerRow:columnsPerRow,exact:!!best,count:n};
 }
 function updateGridModeFields(){
   var countMode=$('gridMode') && $('gridMode').value==='count';
   if($('customGridFields')) $('customGridFields').style.display=countMode?'none':'grid';
   if($('countGridFields')) $('countGridFields').style.display=countMode?'grid':'none';
   if($('gridShapePreview')){
-    var shape=gridShapeFor($('imageCount')?$('imageCount').value:4);
-    $('gridShapePreview').textContent = shape.exact
+    var direction=$('direction')&&$('direction').value==='horizontal'?'horizontal':'vertical';
+    var shape=gridShapeFor($('imageCount')?$('imageCount').value:4,direction);
+    $('gridShapePreview').textContent = (shape.exact
       ? shape.count+' gambar → '+shape.rows+'×'+shape.cols+' (baris×kolom)'
-      : shape.count+' gambar → '+shape.rows+' baris, kolom per baris: '+shape.columnsPerRow.join(', ');
+      : shape.count+' gambar → '+shape.rows+' baris, kolom per baris: '+shape.columnsPerRow.join(', '))+' · '+direction;
   }
 }
 function syncConditional(){
