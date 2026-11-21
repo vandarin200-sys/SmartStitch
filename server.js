@@ -353,7 +353,7 @@ async function handleProcess(req, res) {
 
     res.writeHead(200, {
       'Content-Type': 'application/zip',
-      'Content-Disposition': 'attachment; filename="smartstitch_slices.zip"',
+      'Content-Disposition': 'attachment; filename="' + settings.zip_name + '"',
       'Content-Length': zipBuffer.length,
       'Cache-Control': 'no-store',
       'X-Job-Id': jobId,
@@ -362,6 +362,7 @@ async function handleProcess(req, res) {
       'X-Grid-Shape': grid ? grid.rows + 'x' + grid.cols : '',
       'X-Input-Dirs': String(result.stats.groups),
       'X-Process-Ms': String(Date.now() - started),
+      'X-Zip-Name': settings.zip_name,
       'X-R2-Deleted': String(cleaned.deleted),
       'X-R2-Cleanup-Failed': String(cleaned.failed)
     });
@@ -426,7 +427,7 @@ function createApp() {
         sendJson(res, 405, { error: 'Gunakan GET untuk /api/config.' });
         return;
       }
-      sendJson(res, 200, { filename: { prefixMaxLength: 40, startMax: 999999 } });
+      sendJson(res, 200, { zipName: { maxLength: 60 } });
       return;
     }
 

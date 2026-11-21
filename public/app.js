@@ -5,6 +5,7 @@ var SS_ROOT = document.getElementById('ss-root') || document;
 var $ = function(id){ return SS_ROOT.querySelector('#'+id) || document.getElementById(id); };
 var files = [];
 var zipUrl = null;
+var currentZipName = 'smartstitch_slices.zip';
 var busy = false;
 
 var KEY = 'smartstitch_web_profiles_v1';
@@ -14,14 +15,15 @@ var defaultSettings = {
   split_height:5000, output_type:'.tga', lossy_quality:100,
   detector_type:1, senstivity:90, ignorable_pixels:5, scan_step:5,
   enforce_type:2, enforce_width:720,
-  filename_prefix:'', filename_start:1, last_browse_location:''
+  zip_name:'smartstitch_slices', last_browse_location:''
 };
 var defaultProfiles = [Object.assign({},defaultSettings)];
 var store = loadStore();
 
-function sanitizePrefix(v){
-  return String(v==null?'':v).replace(/[^\p{L}\p{N}_-]+/gu,'_').replace(/^_+/,'').slice(0,40);
+function sanitizeZipName(v){
+  return String(v==null?'':v).trim().replace(/\.zip$/i,'').replace(/[^A-Za-z0-9_-]+/g,'_').replace(/^_+/,'').slice(0,60) || defaultSettings.zip_name;
 }
+function zipFileName(v){ return sanitizeZipName(v)+'.zip'; }
 var current = Math.min(store.current||0, store.profiles.length-1);
 
 function normalizeProfile(p){
@@ -39,8 +41,7 @@ function normalizeProfile(p){
   s.ignorable_pixels = clamp(+s.ignorable_pixels,0,999999,defaultSettings.ignorable_pixels);
   s.enforce_type = clamp(+s.enforce_type,0,2,defaultSettings.enforce_type);
   s.enforce_width = clamp(+s.enforce_width,1,999999999,defaultSettings.enforce_width);
-  s.filename_prefix = sanitizePrefix(s.filename_prefix);
-  s.filename_start = Math.round(clamp(+s.filename_start,1,999999,defaultSettings.filename_start));
+  s.zip_name = sanitizeZipName(s.zip_name || defaultSettings.zip_name);
   return s;
 }
 function loadStore(){
@@ -72,8 +73,7 @@ function readSettings(){
     senstivity:clamp(+$('sensitivity').value,1,100,90),
     scan_step:clamp(+$('scanStep').value,1,25,5),
     ignorable_pixels:clamp(+$('ignoreMargin').value,0,999999,5),
-    filename_prefix:sanitizePrefix($('filenamePrefix')?$('filenamePrefix').value:''),
-    filename_start:Math.round(clamp(+$('filenameStart').value,1,999999,1))
+    zip_name:sanitizeZipName($('zipName')?$('zipName').value:'')
   };
 }
 function writeSettings(s){
@@ -90,8 +90,7 @@ function writeSettings(s){
   $('sensitivity').value = val(s.senstivity,90);
   $('scanStep').value = val(s.scan_step,5);
   $('ignoreMargin').value = val(s.ignorable_pixels,5);
-  if($('filenamePrefix')) $('filenamePrefix').value = s.filename_prefix||'';
-  if($('filenameStart')) $('filenameStart').value = val(s.filename_start,1);
+  if($('zipName')) $('zipName').value = s.zip_name||defaultSettings.zip_name;
   syncConditional();
   updateFmtHint();
 }
@@ -111,25 +110,18 @@ function formatBytes(n){
   if(n<1048576) return (n/1024).toFixed(1)+' KB';
   return (n/1048576).toFixed(1)+' MB';
 }
-function padNum(n){
-  var s=String(n);
-  while(s.length<2) s='0'+s;
-  return s;
-}
-function updateFilenamePreview(){
-  var el=$('filenamePreview');
+function updateZipNamePreview(){
+  var el=$('zipNamePreview');
   if(!el) return;
-  var prefix=sanitizePrefix($('filenamePrefix')?$('filenamePrefix').value:'');
-  var start=Math.round(clamp(+$('filenameStart').value,1,999999,1));
-  var ext=$('outputType').value;
-  el.textContent=prefix+padNum(start)+ext+' … '+prefix+padNum(start+3)+ext;
+  var input=$('zipName');
+  el.textContent=zipFileName(input?input.value:'');
 }
 function updateFmtHint(){
   var f=$('outputType').value;
   var lossy = (f==='.jpg'||f==='.jpeg'||f==='.webp'||f==='.tiff');
   $('qualityWrap').style.display = lossy ? 'flex' : 'none';
   $('fmtHint').textContent = lossy ? 'Kualitas diterapkan saat ekspor.' : 'Format ini tidak menggunakan pengaturan kualitas.';
-  updateFilenamePreview();
+  updateZipNamePreview();
 }
 function updateDirectionLabels(){
   var horizontal = $('direction').value === 'horizontal';
@@ -200,7 +192,7 @@ function syncConditional(){
   updateGridModeFields();
   $('customWrap').style.display = ($('enforce').value==='2')?'flex':'none';
   $('smartOpts').style.display = ($('detector').value==='1')?'grid':'none';
-  updateFilenamePreview();
+  updateZipNamePreview();
 }
 
 Array.prototype.forEach.call(document.querySelectorAll('.ss-tab'),function(btn){
@@ -318,12 +310,12 @@ $('delProfile').addEventListener('click',function(){
   renderProfiles(); writeSettings(cur()); toast('Profil dihapus.');
 });
 function saveSettingsToProfile(){ Object.assign(cur(),readSettings()); store.current=current; saveStore(); }
-['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','filenamePrefix','filenameStart'].forEach(function(id){
+['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','zipName']
+.forEach(function(id){
   $(id).addEventListener('change',function(){ syncConditional(); updateFmtHint(); saveSettingsToProfile(); });
 });
 if($('imageCount')) $('imageCount').addEventListener('input',function(){ updateGridModeFields(); });
-if($('filenamePrefix')) $('filenamePrefix').addEventListener('input',updateFilenamePreview);
-if($('filenameStart')) $('filenameStart').addEventListener('input',updateFilenamePreview);
+if($('zipName')) $('zipName').addEventListener('input',updateZipNamePreview);
 
 $('start').addEventListener('click',function(){ if(!busy) run(); });
 
@@ -345,8 +337,7 @@ function formDataFor(s){
   fd.append('senstivity',String(s.senstivity));
   fd.append('scan_step',String(s.scan_step));
     fd.append('ignorable_pixels',String(s.ignorable_pixels));
-    fd.append('filename_prefix',s.filename_prefix||'');
-    fd.append('filename_start',String(s.filename_start||1));
+    fd.append('zip_name',s.zip_name||defaultSettings.zip_name);
     fd.append('last_browse_location',s.last_browse_location||'');
 
   return fd;
@@ -367,16 +358,17 @@ function closeZipModal(){
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
 }
-function openZipModal(meta){
+function openZipModal(meta,name){
   var modal=$('zipModal');
   if(!modal) return;
+  if($('zipModalName')) $('zipModalName').textContent=name||currentZipName;
   if($('zipModalMeta')) $('zipModalMeta').textContent=meta||'Arsip potongan gambar';
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
   if($('zipModalDownload')) $('zipModalDownload').focus();
 }
 function downloadZip(){
-  if(zipUrl) downloadUrl(zipUrl,'smartstitch_slices.zip');
+  if(zipUrl) downloadUrl(zipUrl,currentZipName);
 }
 function clearResults(){
   if(zipUrl){ URL.revokeObjectURL(zipUrl); zipUrl=null; }
@@ -384,15 +376,16 @@ function clearResults(){
   $('strip').innerHTML='';
   $('preview').classList.remove('show');
 }
-function renderResults(blob){
+function renderResults(blob,name){
   clearResults();
   zipUrl=URL.createObjectURL(blob);
+  currentZipName=name||'smartstitch_slices.zip';
   var strip=$('strip');
-  var card=document.createElement('div'); card.className='ss-shot'; card.title='Unduh arsip ZIP';
+  var card=document.createElement('div'); card.className='ss-shot'; card.title='Unduh '+currentZipName;
   var icon=document.createElement('div');
   icon.textContent='ZIP';
   icon.style.cssText='height:112px;display:flex;align-items:center;justify-content:center;background:#eef2ff;color:#4f46e5;border-radius:9px;font:700 22px/1 Inter,ui-sans-serif,sans-serif;letter-spacing:.08em';
-  var cap=document.createElement('div'); cap.textContent='smartstitch_slices.zip';
+  var cap=document.createElement('div'); cap.textContent=currentZipName;
   card.appendChild(icon); card.appendChild(cap);
   card.addEventListener('click',downloadZip);
   strip.appendChild(card);
@@ -411,7 +404,7 @@ function requestError(stage, message){
   return err;
 }
 function responseHeaders(xhr){
-  var names=['X-Job-Id','X-Processed-Slices','X-Grid-Mode','X-Grid-Shape','X-Input-Dirs','X-Process-Ms','X-R2-Deleted','X-R2-Cleanup-Failed','X-Postprocess','X-Postprocess-Exit'];
+  var names=['X-Job-Id','X-Processed-Slices','X-Grid-Mode','X-Grid-Shape','X-Input-Dirs','X-Process-Ms','X-R2-Deleted','X-R2-Cleanup-Failed','X-Zip-Name'];
   var out={};
   names.forEach(function(name){ out[name.toLowerCase()]=xhr.getResponseHeader(name)||''; });
   return out;
@@ -523,15 +516,15 @@ function runMultipart(s){
     xhr.send(formDataFor(s));
   });
 }
-function finishResult(result, s, t0){
-  renderResults(result.blob);
+function finishResult(result, t0){
   var h=result.headers;
+  renderResults(result.blob,h['x-zip-name']);
   var slices=h['x-processed-slices']||'?';
   var failed=h['x-r2-cleanup-failed']||'0';
   var grid=h['x-grid-shape']||'-';
   var size=result.blob&&result.blob.size?formatBytes(result.blob.size):'-';
   var dt=(performance.now()-t0)/1000;
-  openZipModal('potongan: '+slices+' · tata letak: '+grid+' · '+size);
+  openZipModal('potongan: '+slices+' · tata letak: '+grid+' · '+size,currentZipName);
   log('Selesai dalam '+dt.toFixed(3)+' detik.');
   log('Hasil: '+slices+' potongan · tata letak '+grid+' · ukuran '+size+(failed!=='0'?' · '+failed+' berkas sementara tersisa.':'.'));
   if(failed!=='0') toast('Proses selesai, tetapi sebagian berkas sementara tidak dapat dibersihkan.');
@@ -564,7 +557,7 @@ function run(){
   log('Menyiapkan '+files.length+' gambar untuk diproses.');
 
   runPresigned(s).then(function(result){
-    finishResult(result,s,t0);
+    finishResult(result,t0);
     busy=false; $('start').disabled=false;
   }).catch(function(err){
     if(err&&(err.stage==='presign'||err.stage==='put')){
@@ -572,7 +565,7 @@ function run(){
       return cleanupUpload(err.jobId).then(function(){
         return runMultipart(s);
       }).then(function(result){
-        finishResult(result,s,t0);
+        finishResult(result,t0);
         busy=false; $('start').disabled=false;
       }).catch(function(fallbackErr){
         handleRunError(fallbackErr);

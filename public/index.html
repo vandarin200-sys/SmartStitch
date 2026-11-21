@@ -29,7 +29,7 @@
         <div class="ss-tabs" role="tablist">
           <button class="ss-tab active" data-panel="basic">Dasar</button>
           <button class="ss-tab" data-panel="advanced">Lanjutan</button>
-          <button class="ss-tab" data-panel="filename">Nama File</button>
+          <button class="ss-tab" data-panel="zipname">Nama ZIP</button>
           <button class="ss-tab" data-panel="about">Tentang</button>
         </div>
 
@@ -160,24 +160,17 @@
             </fieldset>
           </section>
 
-          <section class="ss-panel" id="panel-filename">
+          <section class="ss-panel" id="panel-zipname">
             <fieldset class="ss-group">
-              <legend>Nama File Output</legend>
-              <div class="ss-grid">
-                <div class="ss-field">
-                  <label for="filenamePrefix">Prefiks Nama</label>
-                  <input type="text" id="filenamePrefix" maxlength="40" placeholder="Misalnya SS_"/>
-                  <div class="ss-hint">Awalan sebelum nomor, misalnya <code>SS_</code> menghasilkan <code>SS_01.png</code>.</div>
-                </div>
-                <div class="ss-field">
-                  <label for="filenameStart">Nomor Awal</label>
-                  <input type="number" id="filenameStart" min="1" max="999999" value="1"/>
-                  <div class="ss-hint" id="filenamePreview">01.png … 04.png</div>
-                </div>
+              <legend>Nama Arsip ZIP</legend>
+              <div class="ss-field">
+                <label for="zipName">Nama File ZIP</label>
+                <input type="text" id="zipName" maxlength="60" placeholder="smartstitch_slices"/>
+                <div class="ss-hint">Tulis tanpa <code>.zip</code>; ekstensi ditambahkan otomatis. Contoh <code>Hasil_Jahitan</code> menjadi <code id="zipNamePreview">Hasil_Jahitan.zip</code>.</div>
               </div>
             </fieldset>
             <div class="ss-note" style="padding:0">
-              Nomor otomatis bertambah untuk setiap potongan. Karakter khusus pada prefiks diganti menjadi underscore agar nama file tetap aman.
+              Hanya huruf, angka, tanda hubung, dan garis bawah yang digunakan. Nama ini berlaku untuk arsip unduhan; nama potongan di dalam arsip tetap berurutan dari <code>01.ext</code>.
             </div>
           </section>
 
@@ -228,7 +221,7 @@
         <p>Arsip ZIP Anda siap disimpan.</p>
         <div class="ss-modal-file">
           <span class="ss-modal-file-text">
-            <strong>smartstitch_slices.zip</strong>
+            <strong id="zipModalName">smartstitch_slices.zip</strong>
             <small id="zipModalMeta">Arsip potongan gambar</small>
           </span>
         </div>
