@@ -5,7 +5,16 @@ const fs = require('fs');
 const path = require('path');
 const Busboy = require('busboy');
 
-const { configured, missingEnv, createUploadSession } = require('./lib/r2');
+const {
+  cleanupJob,
+  configured,
+  missingEnv,
+  createPresignedUpload,
+  createUploadSession,
+  getObjectBuffer,
+  isInputKey,
+  isValidJobId
+} = require('./lib/r2');
 const {
   gridShape,
   parseSettings,
@@ -68,7 +77,10 @@ function statusForError(err) {
     message.includes('Gagal membaca') ||
     message.includes('tidak diizinkan') ||
     message.includes('belum dipilih') ||
-    message.includes('multipart')
+    message.includes('multipart') ||
+    message.includes('JSON') ||
+    message.includes('Job ID') ||
+    message.includes('Objek')
   ) return 400;
   return 500;
 }
@@ -157,6 +169,116 @@ function parseMultipart(req) {
   });
 }
 
+function parseJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    const contentType = String(req.headers['content-type'] || '');
+    if (!contentType.startsWith('application/json')) {
+      reject(new Error('Content-Type harus application/json.'));
+      return;
+    }
+
+    const chunks = [];
+    let total = 0;
+    req.on('data', (chunk) => {
+      total += chunk.length;
+      if (total > 1024 * 1024) {
+        reject(new Error('Body JSON terlalu besar.'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('error', reject);
+    req.on('end', () => {
+      try {
+        resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+      } catch (err) {
+        reject(new Error('JSON tidak valid.'));
+      }
+    });
+  });
+}
+
+function normalizeUploadedInputs(payload) {
+  const jobId = String(payload.jobId || '');
+  if (!isValidJobId(jobId)) throw new Error('Job ID tidak valid.');
+
+  const raw = Array.isArray(payload.inputs) ? payload.inputs : [];
+  if (!raw.length) throw new Error('Tidak ada gambar yang dikirim.');
+  if (raw.length > MAX_FILES) throw new Error('Terlalu banyak file gambar.');
+
+  return raw.map((item) => {
+    if (!isInputKey(jobId, item.key)) throw new Error('Objek upload tidak valid.');
+    const name = path.basename(String(item.name || 'file'));
+    const relativePath = String(item.relativePath || name).replace(/\\/g, '/');
+    const size = Math.trunc(Number(item.size));
+    if (!Number.isFinite(size) || size < 0 || size > MAX_FILE_SIZE) {
+      throw new Error('Ukuran file melebihi batas: ' + name);
+    }
+    return { key: item.key, name, relativePath, size };
+  });
+}
+
+async function handlePresign(req, res) {
+  try {
+    if (!configured()) {
+      sendJson(res, 503, { error: 'Cloudflare R2 belum dikonfigurasi.', missing: missingEnv() });
+      return;
+    }
+
+    const payload = await parseJsonBody(req);
+    const raw = Array.isArray(payload.files) ? payload.files : [];
+    if (!raw.length) throw new Error('Tidak ada gambar yang dikirim.');
+    if (raw.length > MAX_FILES) throw new Error('Terlalu banyak file gambar.');
+
+    let total = 0;
+    const files = raw.map((item) => {
+      const name = path.basename(String(item.name || 'file'));
+      const size = Math.trunc(Number(item.size));
+      if (!Number.isFinite(size) || size < 0 || size > MAX_FILE_SIZE) {
+        throw new Error('Ukuran file melebihi batas: ' + name);
+      }
+      total += size;
+      return {
+        name,
+        relativePath: String(item.relativePath || name).replace(/\\/g, '/'),
+        size
+      };
+    });
+    if (total > MAX_TOTAL_SIZE) throw new Error('Total ukuran gambar melebihi batas.');
+
+    const rejected = files.filter((item) => !isSupportedInput(item.name));
+    if (rejected.length) {
+      throw new Error('Format tidak didukung: ' + rejected.map((item) => item.name).join(', '));
+    }
+
+    const result = await createPresignedUpload(files);
+    sendJson(res, 200, result);
+  } catch (err) {
+    console.error('[presign] gagal: ' + (err && err.stack ? err.stack : err));
+    if (!res.writableEnded && !res.destroyed) {
+      sendJson(res, statusForError(err), { error: err && err.message ? err.message : String(err) });
+    }
+  }
+}
+
+async function handleUploadCleanup(req, res) {
+  try {
+    if (!configured()) {
+      sendJson(res, 503, { error: 'Cloudflare R2 belum dikonfigurasi.', missing: missingEnv() });
+      return;
+    }
+    const payload = await parseJsonBody(req);
+    const result = await cleanupJob(payload.jobId);
+    sendJson(res, 200, result);
+  } catch (err) {
+    console.error('[upload-cleanup] gagal: ' + (err && err.stack ? err.stack : err));
+    if (!res.writableEnded && !res.destroyed) {
+      sendJson(res, statusForError(err), { error: err && err.message ? err.message : String(err) });
+    }
+  }
+}
+
 async function handleProcess(req, res) {
   let session = null;
   let workDir = null;
@@ -170,8 +292,38 @@ async function handleProcess(req, res) {
       return;
     }
 
-    const parsed = await parseMultipart(req);
-    const inputs = parsed.files.slice()
+    const started = Date.now();
+    const contentType = String(req.headers['content-type'] || '');
+    const fromR2 = contentType.startsWith('application/json');
+    let fields;
+    let inputs;
+    let jobId;
+
+    if (fromR2) {
+      const payload = await parseJsonBody(req);
+      const uploaded = normalizeUploadedInputs(payload);
+      jobId = String(payload.jobId);
+      session = createUploadSession(jobId, uploaded.map((item) => item.key));
+      fields = payload.settings || payload.fields || payload;
+      inputs = [];
+      let total = 0;
+
+      for (const item of uploaded) {
+        const buffer = await getObjectBuffer(item.key);
+        if (buffer.length > MAX_FILE_SIZE) {
+          throw new Error('Ukuran file melebihi batas: ' + item.name);
+        }
+        total += buffer.length;
+        if (total > MAX_TOTAL_SIZE) throw new Error('Total ukuran gambar melebihi batas.');
+        inputs.push({ name: item.name, relativePath: item.relativePath, buffer });
+      }
+    } else {
+      const parsed = await parseMultipart(req);
+      fields = parsed.fields;
+      inputs = parsed.files;
+    }
+
+    inputs = inputs.slice()
       .sort((a, b) => naturalCompare(a.relativePath || a.name, b.relativePath || b.name));
 
     if (!inputs.length) throw new Error('Tidak ada gambar yang dikirim.');
@@ -181,10 +333,10 @@ async function handleProcess(req, res) {
       throw new Error('Format tidak didukung: ' + rejected.map((item) => item.name).join(', '));
     }
 
-    const settings = parseSettings(parsed.fields);
+    const settings = parseSettings(fields);
     const grid = settings.grid_mode === 'count' ? gridShape(settings.image_count) : null;
-    const postKey = String(parsed.fields.postprocess_app || '').trim();
-    const postArgs = String(parsed.fields.postprocess_args || '');
+    const postKey = String(fields.postprocess_app || '').trim();
+    const postArgs = String(fields.postprocess_args || '');
 
     if (settings.run_postprocess && !postKey) {
       throw new Error('Post-process aktif tetapi aplikasi belum dipilih.');
@@ -193,13 +345,16 @@ async function handleProcess(req, res) {
       throw new Error('Aplikasi post-process tidak diizinkan.');
     }
 
-    session = createUploadSession();
-    const jobId = session.jobId;
-    const started = Date.now();
+    if (!fromR2) {
+      session = createUploadSession();
+      jobId = session.jobId;
+    }
     workDir = await createWorkDir(jobId);
 
-    for (let i = 0; i < inputs.length; i++) {
-      await session.put('input', String(i + 1).padStart(3, '0') + '-' + inputs[i].name, inputs[i].buffer);
+    if (!fromR2) {
+      for (let i = 0; i < inputs.length; i++) {
+        await session.put('input', String(i + 1).padStart(3, '0') + '-' + inputs[i].name, inputs[i].buffer);
+      }
     }
 
     const result = await processInputGroups(inputs, settings, {
@@ -320,6 +475,24 @@ function createApp() {
       return;
     }
 
+    if (urlPath === '/api/presign') {
+      if (req.method !== 'POST') {
+        sendJson(res, 405, { error: 'Gunakan POST untuk /api/presign.' });
+        return;
+      }
+      handlePresign(req, res);
+      return;
+    }
+
+    if (urlPath === '/api/upload-cleanup') {
+      if (req.method !== 'POST') {
+        sendJson(res, 405, { error: 'Gunakan POST untuk /api/upload-cleanup.' });
+        return;
+      }
+      handleUploadCleanup(req, res);
+      return;
+    }
+
     if (urlPath === '/api/process') {
       if (req.method !== 'POST') {
         sendJson(res, 405, { error: 'Gunakan POST untuk /api/process.' });
@@ -345,7 +518,9 @@ function createApp() {
 
 module.exports = {
   createApp,
+  handlePresign,
   handleProcess,
+  handleUploadCleanup,
   parseMultipart,
   sendJson,
   serveStatic,

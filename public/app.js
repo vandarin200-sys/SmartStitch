@@ -378,6 +378,154 @@ function loadPostprocessApps(){
   });
 }
 
+function requestError(stage, message){
+  var err=new Error(message);
+  err.stage=stage;
+  return err;
+}
+function responseHeaders(xhr){
+  var names=['X-Job-Id','X-Processed-Slices','X-Grid-Mode','X-Grid-Shape','X-Input-Dirs','X-Process-Ms','X-R2-Deleted','X-R2-Cleanup-Failed','X-Postprocess','X-Postprocess-Exit'];
+  var out={};
+  names.forEach(function(name){ out[name.toLowerCase()]=xhr.getResponseHeader(name)||''; });
+  return out;
+}
+function putToR2(upload, fileObj, onProgress){
+  return new Promise(function(resolve,reject){
+    var xhr=new XMLHttpRequest();
+    xhr.open(upload.method||'PUT',upload.url,true);
+    xhr.upload.addEventListener('progress',onProgress);
+    xhr.addEventListener('load',function(){
+      if(xhr.status>=200&&xhr.status<300) resolve();
+      else reject(requestError('put','Upload R2 gagal ('+xhr.status+') untuk '+upload.name+'.'));
+    });
+    xhr.addEventListener('error',function(){ reject(requestError('put','Upload R2 gagal untuk '+upload.name+'.')); });
+    xhr.send(fileObj.file);
+  });
+}
+function runPresigned(s){
+  return fetch('/api/presign',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({files:files.map(function(f){ return {name:f.name,relativePath:f.relativePath,size:f.size}; })})
+  }).then(function(r){
+    return r.text().then(function(text){
+      if(!r.ok) throw requestError('presign',errorMessage(text));
+      try{ return JSON.parse(text); }catch(e){ throw requestError('presign','Respons presign tidak valid.'); }
+    });
+  }).then(function(data){
+    if(!data||!data.jobId||!Array.isArray(data.uploads)||!data.uploads.length){
+      throw requestError('presign','Respons presign tidak valid.');
+    }
+    var totalBytes=data.uploads.reduce(function(sum,u){ return sum+(u.size||0); },0)||1;
+    var uploadedBytes=0;
+    var chain=Promise.resolve();
+
+    data.uploads.forEach(function(upload,index){
+      chain=chain.then(function(){
+        var fileObj=files[index];
+        if(!fileObj) throw requestError('presign','File tidak ditemukan: '+upload.name+'.');
+        return putToR2(upload,fileObj,function(e){
+          if(!e.lengthComputable) return;
+          var p=Math.round((uploadedBytes+e.loaded)/totalBytes*35);
+          setStatus('Upload langsung ke R2… '+p+'%',p);
+        }).catch(function(err){
+          err.jobId=data.jobId;
+          throw err;
+        }).then(function(){ uploadedBytes+=upload.size||fileObj.size||0; });
+      });
+    });
+
+    return chain.then(function(){
+      setStatus('Memproses di server — menyimpan sementara di Cloudflare R2…',38);
+      log('Upload langsung ke R2 selesai. Memproses di server…');
+      return new Promise(function(resolve,reject){
+        var xhr=new XMLHttpRequest();
+        xhr.open('POST','/api/process',true);
+        xhr.responseType='blob';
+        xhr.setRequestHeader('Content-Type','application/json');
+        xhr.addEventListener('load',function(){
+          if(xhr.status>=200&&xhr.status<300){
+            resolve({blob:xhr.response,headers:responseHeaders(xhr)});
+          }else{
+            blobText(xhr.response).then(function(text){ reject(requestError('process',errorMessage(text))); });
+          }
+        });
+        xhr.addEventListener('error',function(){ reject(requestError('process','Server tidak merespons.')); });
+        xhr.send(JSON.stringify({
+          jobId:data.jobId,
+          inputs:data.uploads.map(function(u){ return {key:u.key,name:u.name,relativePath:u.relativePath,size:u.size}; }),
+          settings:s
+        }));
+      });
+    });
+  });
+}
+function runMultipart(s){
+  setStatus('Mengunggah '+files.length+' gambar ke server…',2);
+  log('Fallback: mengirim gambar lewat multipart ke server.');
+  var fake=2;
+  var timer=setInterval(function(){ if(fake<88){ fake+=1; $('bar').style.width=fake+'%'; } },420);
+
+  return new Promise(function(resolve,reject){
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST','/api/process',true);
+    xhr.responseType='blob';
+    xhr.upload.addEventListener('progress',function(e){
+      if(e.lengthComputable){
+        var p=Math.round(e.loaded/e.total*35);
+        setStatus('Mengunggah ke server… '+p+'%',p);
+      }
+    });
+    xhr.upload.addEventListener('load',function(){
+      setStatus('Memproses di server — menyimpan sementara di Cloudflare R2…',38);
+      log('Upload selesai. Server memproses gambar dan menyimpan sementara di R2.');
+    });
+    xhr.addEventListener('load',function(){
+      clearInterval(timer);
+      if(xhr.status>=200&&xhr.status<300) resolve({blob:xhr.response,headers:responseHeaders(xhr)});
+      else blobText(xhr.response).then(function(text){ reject(requestError('multipart',errorMessage(text))); });
+    });
+    xhr.addEventListener('error',function(){
+      clearInterval(timer);
+      reject(requestError('multipart','Jaringan / server tidak merespons.'));
+    });
+    xhr.addEventListener('abort',function(){
+      clearInterval(timer);
+      reject(requestError('multipart','Upload dibatalkan.'));
+    });
+    xhr.send(formDataFor(s));
+  });
+}
+function finishResult(result, s, t0){
+  renderResults(result.blob);
+  var h=result.headers;
+  var slices=h['x-processed-slices']||'?';
+  var deleted=h['x-r2-deleted']||'0';
+  var failed=h['x-r2-cleanup-failed']||'0';
+  var job=h['x-job-id']||'-';
+  var grid=h['x-grid-shape']||'-';
+  var dt=(performance.now()-t0)/1000;
+  log('Selesai dalam '+dt.toFixed(3)+' detik.');
+  log('Job: '+job+' · grid: '+grid+' · slice: '+slices+' · R2 dihapus: '+deleted+' · gagal: '+failed);
+  if(failed!=='0') toast('Proses selesai, tetapi sebagian objek R2 gagal dihapus.');
+  else toast('Selesai — objek R2 sementara sudah dihapus.');
+  setStatus('Idle — Process completed in '+dt.toFixed(3)+' seconds',100);
+  if(s.run_postprocess) downloadUrl(zipUrl,'smartstitch_slices.zip');
+}
+function cleanupUpload(jobId){
+  if(!jobId) return Promise.resolve();
+  return fetch('/api/upload-cleanup',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jobId:jobId})
+  }).catch(function(){ return null; });
+}
+function handleRunError(err){
+  var msg=err&&err.message?err.message:'Permintaan gagal.';
+  log('ERROR: '+msg);
+  setStatus('Idle — gagal: '+msg,0);
+  toast(msg);
+}
 function run(){
   if(!files.length){ toast('Pilih gambar dulu.'); return; }
   busy=true; $('start').disabled=true; $('log').textContent=''; $('log').classList.add('show');
@@ -386,61 +534,28 @@ function run(){
   var s=readSettings();
   Object.assign(cur(),s); saveStore();
 
-  setStatus('Mengunggah '+files.length+' gambar ke server…',2);
-  log('Mengirim '+files.length+' gambar ke server untuk diproses.');
-  var fake=2;
-  var timer=setInterval(function(){ if(fake<88){ fake+=1; $('bar').style.width=fake+'%'; } },420);
+  setStatus('Menyiapkan upload langsung ke R2…',2);
+  log('Menyiapkan '+files.length+' upload langsung ke Cloudflare R2.');
 
-  var xhr=new XMLHttpRequest();
-  xhr.open('POST','/api/process',true);
-  xhr.responseType='blob';
-  xhr.upload.addEventListener('progress',function(e){
-    if(e.lengthComputable){
-      var p=Math.round(e.loaded/e.total*35);
-      setStatus('Mengunggah ke server… '+p+'%',p);
-    }
-  });
-  xhr.upload.addEventListener('load',function(){
-    setStatus('Memproses di server — menyimpan sementara di Cloudflare R2…',38);
-    log('Upload selesai. Server memproses gambar dan menyimpan sementara di R2.');
-  });
-  xhr.addEventListener('load',function(){
-    clearInterval(timer);
-    if(xhr.status>=200&&xhr.status<300){
-      renderResults(xhr.response);
-      var slices=xhr.getResponseHeader('X-Processed-Slices')||'?';
-      var deleted=xhr.getResponseHeader('X-R2-Deleted')||'0';
-      var failed=xhr.getResponseHeader('X-R2-Cleanup-Failed')||'0';
-      var job=xhr.getResponseHeader('X-Job-Id')||'-';
-      var dt=(performance.now()-t0)/1000;
-      log('Selesai dalam '+dt.toFixed(3)+' detik.');
-      log('Job: '+job+' · slice: '+slices+' · R2 dihapus: '+deleted+' · gagal: '+failed);
-      if(failed!=='0') toast('Proses selesai, tetapi sebagian objek R2 gagal dihapus.');
-      else toast('Selesai — objek R2 sementara sudah dihapus.');
-      setStatus('Idle — Process completed in '+dt.toFixed(3)+' seconds',100);
-      if(s.run_postprocess) downloadUrl(zipUrl,'smartstitch_slices.zip');
-    }else{
-      blobText(xhr.response).then(function(text){
-        var msg=errorMessage(text);
-        log('ERROR: '+msg);
-        setStatus('Idle — gagal: '+msg,0);
-        toast(msg);
+  runPresigned(s).then(function(result){
+    finishResult(result,s,t0);
+    busy=false; $('start').disabled=false;
+  }).catch(function(err){
+    if(err&&(err.stage==='presign'||err.stage==='put')){
+      log('Upload langsung gagal: '+err.message+' Fallback ke multipart.');
+      return cleanupUpload(err.jobId).then(function(){
+        return runMultipart(s);
+      }).then(function(result){
+        finishResult(result,s,t0);
+        busy=false; $('start').disabled=false;
+      }).catch(function(fallbackErr){
+        handleRunError(fallbackErr);
+        busy=false; $('start').disabled=false;
       });
     }
+    handleRunError(err);
     busy=false; $('start').disabled=false;
   });
-  xhr.addEventListener('error',function(){
-    clearInterval(timer);
-    log('ERROR: jaringan / server tidak merespons.');
-    setStatus('Idle — gagal: jaringan / server tidak merespons.',0);
-    toast('Server tidak merespons.');
-    busy=false; $('start').disabled=false;
-  });
-  xhr.addEventListener('abort',function(){
-    clearInterval(timer);
-    busy=false; $('start').disabled=false;
-  });
-  xhr.send(formDataFor(s));
 }
 
 writeSettings(cur());

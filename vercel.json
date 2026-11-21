@@ -3,6 +3,12 @@
   "functions": {
     "api/process.js": {
       "maxDuration": 300
+    },
+    "api/presign.js": {
+      "maxDuration": 30
+    },
+    "api/upload-cleanup.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
