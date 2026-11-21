@@ -46,21 +46,22 @@ while [ "$#" -gt 0 ]; do
       exit 0
       ;;
     *)
-      if [ -z "$input_dir" ]; then
+      if [ -z "$input_dir" ] && [ -d "$1" ]; then
         input_dir=$1
-      elif [ -z "$output_dir" ]; then
+      elif [ -z "$output_dir" ] && [ -d "$1" ]; then
         output_dir=$1
-      else
-        printf 'Argumen tidak dikenali: %s\n' "$1" >&2
-        usage
-        exit 2
       fi
       shift
       ;;
   esac
 done
 
-[ -n "$output_dir" ] || { usage; exit 2; }
+if [ -z "$input_dir" ]; then
+  input_dir="$PWD/combined"
+fi
+if [ -z "$output_dir" ]; then
+  output_dir="$PWD/output"
+fi
 [ -d "$output_dir" ] || { printf 'Folder output tidak ditemukan: %s\n' "$output_dir" >&2; exit 1; }
 [ -w "$output_dir" ] || { printf 'Folder output tidak dapat ditulis: %s\n' "$output_dir" >&2; exit 1; }
 
