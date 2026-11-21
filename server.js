@@ -3,6 +3,31 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+
+function loadEnvFile() {
+  let text;
+  try {
+    text = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
+  } catch (err) {
+    return;
+  }
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const match = trimmed.replace(/^export\s+/, '').match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!match || Object.prototype.hasOwnProperty.call(process.env, match[1])) continue;
+    let value = match[2].trim();
+    const quote = value[0];
+    if ((quote === '"' || quote === "'") && value.endsWith(quote)) {
+      value = value.slice(1, -1);
+    } else {
+      value = value.replace(/\s+#.*$/, '').trim();
+    }
+    process.env[match[1]] = value;
+  }
+}
+loadEnvFile();
+
 const Busboy = require('busboy');
 
 const {
@@ -26,7 +51,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT = path.join(__dirname, 'public');
 
-const MAX_FILES = Number(process.env.MAX_FILES) || 60;
+const MAX_FILES = Number(process.env.MAX_FILES) || 200;
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 25 * 1024 * 1024;
 const MAX_TOTAL_SIZE = Number(process.env.MAX_TOTAL_SIZE) || 500 * 1024 * 1024;
 
@@ -427,7 +452,7 @@ function createApp() {
         sendJson(res, 405, { error: 'Gunakan GET untuk /api/config.' });
         return;
       }
-      sendJson(res, 200, { zipName: { maxLength: 60 }, sliceStart: { maxLength: 9, max: 999999999 } });
+      sendJson(res, 200, { files: { max: MAX_FILES }, zipName: { maxLength: 60 }, sliceStart: { maxLength: 9, max: 999999999 } });
       return;
     }
 
@@ -473,6 +498,7 @@ function createApp() {
 }
 
 module.exports = {
+  MAX_FILES,
   createApp,
   handlePresign,
   handleProcess,

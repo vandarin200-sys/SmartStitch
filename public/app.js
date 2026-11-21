@@ -5,8 +5,9 @@ var SS_ROOT = document.getElementById('ss-root') || document;
 var $ = function(id){ return SS_ROOT.querySelector('#'+id) || document.getElementById(id); };
 var files = [];
 var zipUrl = null;
-var currentZipName = 'smartstitch_slices.zip';
+var currentZipName = 'SmartStitch.zip';
 var busy = false;
+var maxFiles = 200;
 
 var KEY = 'smartstitch_web_profiles_v1';
 var defaultSettings = {
@@ -15,7 +16,7 @@ var defaultSettings = {
   split_height:5000, output_type:'.tga', lossy_quality:100,
   detector_type:1, senstivity:90, ignorable_pixels:5, scan_step:5,
   enforce_type:2, enforce_width:720,
-  zip_name:'smartstitch_slices', slice_start:'01', last_browse_location:''
+  zip_name:'SmartStitch', slice_start:'01', last_browse_location:''
 };
 var defaultProfiles = [Object.assign({},defaultSettings)];
 var store = loadStore();
@@ -247,6 +248,12 @@ function addFiles(list){
   var arr=Array.prototype.slice.call(list);
   var ok=arr.filter(function(f){ return /\.(png|jpe?g|jfif|webp|bmp|tiff?|tga|ps[bd])$/i.test(f.name); });
   if(!ok.length){ toast('Format berkas tidak didukung.'); return; }
+  var remaining=maxFiles-files.length;
+  if(remaining<=0){ toast('Maksimal '+maxFiles+' gambar.'); return; }
+  if(ok.length>remaining){
+    toast('Hanya '+remaining+' gambar lagi yang bisa ditambahkan (maksimal '+maxFiles+').');
+    ok=ok.slice(0,remaining);
+  }
   ok=ok.map(function(f){
     return {file:f, name:f.name, size:f.size, relativePath:f.webkitRelativePath||f.name};
   });
@@ -266,6 +273,18 @@ function renderFiles(){
   });
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function loadMaxFiles(){
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET','/api/config',true);
+  xhr.addEventListener('load',function(){
+    if(xhr.status<200||xhr.status>=300) return;
+    try{
+      var cfg=JSON.parse(xhr.responseText);
+      if(cfg&&cfg.files&&Number(cfg.files.max)>0) maxFiles=Number(cfg.files.max);
+    }catch(e){}
+  });
+  xhr.send();
+}
 
 var selectViews=[];
 function closeAllSelects(){ selectViews.forEach(function(v){ v.wrap.classList.remove('open'); v.btn.setAttribute('aria-expanded','false'); }); }
@@ -411,7 +430,7 @@ function clearResults(){
 function renderResults(blob,name){
   clearResults();
   zipUrl=URL.createObjectURL(blob);
-  currentZipName=name||'smartstitch_slices.zip';
+  currentZipName=name||'SmartStitch.zip';
   var strip=$('strip');
   var card=document.createElement('div'); card.className='ss-shot'; card.title='Unduh '+currentZipName;
   var icon=document.createElement('div');
@@ -609,6 +628,7 @@ function run(){
   });
 }
 
+loadMaxFiles();
 writeSettings(cur());
 renderProfiles();
 enhanceSelects();
