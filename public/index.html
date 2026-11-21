@@ -224,6 +224,27 @@
     </div>
     <div class="ss-toast" id="toast"></div>
 
+    <div class="ss-modal" id="zipModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="zipModalTitle">
+      <div class="ss-modal-backdrop" id="zipModalBackdrop"></div>
+      <div class="ss-modal-card" role="document">
+        <button class="ss-modal-close" id="zipModalClose" type="button" aria-label="Tutup">&times;</button>
+        <div class="ss-modal-icon">ZIP</div>
+        <h3 id="zipModalTitle">Proses selesai</h3>
+        <p>Arsip hasil sudah siap diunduh.</p>
+        <div class="ss-modal-file">
+          <span class="ss-modal-file-icon">&#128230;</span>
+          <span class="ss-modal-file-text">
+            <strong>smartstitch_slices.zip</strong>
+            <small id="zipModalMeta">Arsip potongan gambar</small>
+          </span>
+        </div>
+        <div class="ss-modal-actions">
+          <button class="ss-btn" id="zipModalSecondary" type="button">Tutup</button>
+          <button class="ss-btn primary" id="zipModalDownload" type="button">Unduh ZIP</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 

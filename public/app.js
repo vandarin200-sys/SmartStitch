@@ -343,8 +343,26 @@ function errorMessage(text){
 function downloadUrl(url,name){
   var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
 }
+function closeZipModal(){
+  var modal=$('zipModal');
+  if(!modal) return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+}
+function openZipModal(meta){
+  var modal=$('zipModal');
+  if(!modal) return;
+  if($('zipModalMeta')) $('zipModalMeta').textContent=meta||'Arsip potongan gambar';
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  if($('zipModalDownload')) $('zipModalDownload').focus();
+}
+function downloadZip(){
+  if(zipUrl) downloadUrl(zipUrl,'smartstitch_slices.zip');
+}
 function clearResults(){
   if(zipUrl){ URL.revokeObjectURL(zipUrl); zipUrl=null; }
+  closeZipModal();
   $('strip').innerHTML='';
   $('preview').classList.remove('show');
 }
@@ -358,10 +376,16 @@ function renderResults(blob){
   icon.style.cssText='height:112px;display:flex;align-items:center;justify-content:center;background:#eef2ff;color:#4f46e5;border-radius:9px;font:700 22px/1 Inter,ui-sans-serif,sans-serif;letter-spacing:.08em';
   var cap=document.createElement('div'); cap.textContent='smartstitch_slices.zip';
   card.appendChild(icon); card.appendChild(cap);
-  card.addEventListener('click',function(){ downloadUrl(zipUrl,'smartstitch_slices.zip'); });
+  card.addEventListener('click',downloadZip);
   strip.appendChild(card);
   $('preview').classList.add('show');
 }
+
+if($('zipModalClose')) $('zipModalClose').addEventListener('click',closeZipModal);
+if($('zipModalSecondary')) $('zipModalSecondary').addEventListener('click',closeZipModal);
+if($('zipModalBackdrop')) $('zipModalBackdrop').addEventListener('click',closeZipModal);
+if($('zipModalDownload')) $('zipModalDownload').addEventListener('click',downloadZip);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeZipModal(); });
 
 function loadPostprocessApps(){
   var sel=$('postprocessApp');
@@ -510,13 +534,15 @@ function finishResult(result, s, t0){
   var failed=h['x-r2-cleanup-failed']||'0';
   var job=h['x-job-id']||'-';
   var grid=h['x-grid-shape']||'-';
+  var size=result.blob&&result.blob.size?formatBytes(result.blob.size):'-';
   var dt=(performance.now()-t0)/1000;
+  openZipModal('slice: '+slices+' · grid: '+grid+' · '+size);
   log('Selesai dalam '+dt.toFixed(3)+' detik.');
   log('Job: '+job+' · grid: '+grid+' · slice: '+slices+' · R2 dihapus: '+deleted+' · gagal: '+failed);
   if(failed!=='0') toast('Proses selesai, tetapi sebagian objek R2 gagal dihapus.');
   else toast('Selesai — objek R2 sementara sudah dihapus.');
   setStatus('Idle — Process completed in '+dt.toFixed(3)+' seconds',100);
-  if(s.run_postprocess) downloadUrl(zipUrl,'smartstitch_slices.zip');
+  if(s.run_postprocess) downloadZip();
 }
 function cleanupUpload(jobId){
   if(!jobId) return Promise.resolve();
