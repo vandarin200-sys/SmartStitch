@@ -29,7 +29,7 @@
         <div class="ss-tabs" role="tablist">
           <button class="ss-tab active" data-panel="basic">Dasar</button>
           <button class="ss-tab" data-panel="advanced">Lanjutan</button>
-          <button class="ss-tab" data-panel="zipname">Nama ZIP</button>
+          <button class="ss-tab" data-panel="filename">Nama File</button>
           <button class="ss-tab" data-panel="about">Tentang</button>
         </div>
 
@@ -160,17 +160,24 @@
             </fieldset>
           </section>
 
-          <section class="ss-panel" id="panel-zipname">
+          <section class="ss-panel" id="panel-filename">
             <fieldset class="ss-group">
-              <legend>Nama Arsip ZIP</legend>
-              <div class="ss-field">
-                <label for="zipName">Nama File ZIP</label>
-                <input type="text" id="zipName" maxlength="60" placeholder="smartstitch_slices"/>
-                <div class="ss-hint">Tulis tanpa <code>.zip</code>; ekstensi ditambahkan otomatis. Contoh <code>Hasil_Jahitan</code> menjadi <code id="zipNamePreview">Hasil_Jahitan.zip</code>.</div>
+              <legend>Nama File Output</legend>
+              <div class="ss-grid">
+                <div class="ss-field">
+                  <label for="zipName">Nama File ZIP</label>
+                  <input type="text" id="zipName" maxlength="60" placeholder="smartstitch_slices"/>
+                  <div class="ss-hint">Tulis tanpa <code>.zip</code>; ekstensi ditambahkan otomatis. Contoh <code>Hasil_Jahitan</code> menjadi <code id="zipNamePreview">Hasil_Jahitan.zip</code>.</div>
+                </div>
+                <div class="ss-field">
+                  <label for="sliceStart">Nomor Awal Potongan</label>
+                  <input type="text" id="sliceStart" inputmode="numeric" pattern="[0-9]*" maxlength="9" placeholder="01"/>
+                  <div class="ss-hint" id="sliceStartPreview">01.png · 02.png · 03.png</div>
+                </div>
               </div>
             </fieldset>
             <div class="ss-note" style="padding:0">
-              Hanya huruf, angka, tanda hubung, dan garis bawah yang digunakan. Nama ini berlaku untuk arsip unduhan; nama potongan di dalam arsip tetap berurutan dari <code>01.ext</code>.
+              Nama ZIP hanya memakai huruf, angka, tanda hubung, dan garis bawah. Nomor awal potongan boleh ditulis dengan angka depan, misalnya <code>001</code> atau <code>0001</code>; nomor berikutnya mengikuti jumlah digit tersebut.
             </div>
           </section>
 
@@ -189,7 +196,8 @@
               </ol>
 
               <h3>Hasil &amp; Kompatibilitas</h3>
-              <p>Setiap potongan diberi nama berurutan, mulai dari <code>01.ext</code>. Format yang didukung meliputi <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, dan <code>PSB</code>. Pengaturan favorit dapat disimpan sebagai profil di browser Anda.</p>
+                            <p>Setiap potongan diberi nama berurutan sesuai nomor awal yang dipilih. Format yang didukung meliputi
+ <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, dan <code>PSB</code>. Pengaturan favorit dapat disimpan sebagai profil di browser Anda.</p>
 
               <h3>Privasi</h3>
               <p>Berkas hanya disimpan sementara selama proses berlangsung dan dihapus otomatis setelah arsip ZIP tersedia. Profil pengaturan tetap tersimpan secara lokal di browser.</p>

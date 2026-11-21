@@ -15,7 +15,7 @@ var defaultSettings = {
   split_height:5000, output_type:'.tga', lossy_quality:100,
   detector_type:1, senstivity:90, ignorable_pixels:5, scan_step:5,
   enforce_type:2, enforce_width:720,
-  zip_name:'smartstitch_slices', last_browse_location:''
+  zip_name:'smartstitch_slices', slice_start:'01', last_browse_location:''
 };
 var defaultProfiles = [Object.assign({},defaultSettings)];
 var store = loadStore();
@@ -24,6 +24,15 @@ function sanitizeZipName(v){
   return String(v==null?'':v).trim().replace(/\.zip$/i,'').replace(/[^A-Za-z0-9_-]+/g,'_').replace(/^_+/,'').slice(0,60) || defaultSettings.zip_name;
 }
 function zipFileName(v){ return sanitizeZipName(v)+'.zip'; }
+function sanitizeSliceStart(v){
+  var raw=String(v==null?'':v).trim();
+  if(!/^\d+$/.test(raw)) return defaultSettings.slice_start;
+  var width=Math.min(raw.length,9);
+  var number=Math.min(999999999,Math.max(1,parseInt(raw,10)));
+  var text=String(number);
+  while(text.length<width) text='0'+text;
+  return text;
+}
 var current = Math.min(store.current||0, store.profiles.length-1);
 
 function normalizeProfile(p){
@@ -42,6 +51,7 @@ function normalizeProfile(p){
   s.enforce_type = clamp(+s.enforce_type,0,2,defaultSettings.enforce_type);
   s.enforce_width = clamp(+s.enforce_width,1,999999999,defaultSettings.enforce_width);
   s.zip_name = sanitizeZipName(s.zip_name || defaultSettings.zip_name);
+  s.slice_start = sanitizeSliceStart(s.slice_start);
   return s;
 }
 function loadStore(){
@@ -73,7 +83,8 @@ function readSettings(){
     senstivity:clamp(+$('sensitivity').value,1,100,90),
     scan_step:clamp(+$('scanStep').value,1,25,5),
     ignorable_pixels:clamp(+$('ignoreMargin').value,0,999999,5),
-    zip_name:sanitizeZipName($('zipName')?$('zipName').value:'')
+    zip_name:sanitizeZipName($('zipName')?$('zipName').value:''),
+    slice_start:sanitizeSliceStart($('sliceStart')?$('sliceStart').value:'')
   };
 }
 function writeSettings(s){
@@ -91,6 +102,7 @@ function writeSettings(s){
   $('scanStep').value = val(s.scan_step,5);
   $('ignoreMargin').value = val(s.ignorable_pixels,5);
   if($('zipName')) $('zipName').value = s.zip_name||defaultSettings.zip_name;
+  if($('sliceStart')) $('sliceStart').value = s.slice_start||defaultSettings.slice_start;
   syncConditional();
   updateFmtHint();
 }
@@ -116,12 +128,29 @@ function updateZipNamePreview(){
   var input=$('zipName');
   el.textContent=zipFileName(input?input.value:'');
 }
+function updateSliceStartPreview(){
+  var el=$('sliceStartPreview');
+  if(!el) return;
+  var input=$('sliceStart');
+  var start=sanitizeSliceStart(input?input.value:'');
+  var width=start.length;
+  var number=parseInt(start,10);
+  var ext=$('outputType').value;
+  var names=[];
+  for(var i=0;i<3;i++){
+    var n=String(number+i);
+    while(n.length<width) n='0'+n;
+    names.push(n+ext);
+  }
+  el.textContent=names.join(' · ');
+}
 function updateFmtHint(){
   var f=$('outputType').value;
   var lossy = (f==='.jpg'||f==='.jpeg'||f==='.webp'||f==='.tiff');
   $('qualityWrap').style.display = lossy ? 'flex' : 'none';
   $('fmtHint').textContent = lossy ? 'Kualitas diterapkan saat ekspor.' : 'Format ini tidak menggunakan pengaturan kualitas.';
   updateZipNamePreview();
+  updateSliceStartPreview();
 }
 function updateDirectionLabels(){
   var horizontal = $('direction').value === 'horizontal';
@@ -193,6 +222,7 @@ function syncConditional(){
   $('customWrap').style.display = ($('enforce').value==='2')?'flex':'none';
   $('smartOpts').style.display = ($('detector').value==='1')?'grid':'none';
   updateZipNamePreview();
+  updateSliceStartPreview();
 }
 
 Array.prototype.forEach.call(document.querySelectorAll('.ss-tab'),function(btn){
@@ -310,12 +340,13 @@ $('delProfile').addEventListener('click',function(){
   renderProfiles(); writeSettings(cur()); toast('Profil dihapus.');
 });
 function saveSettingsToProfile(){ Object.assign(cur(),readSettings()); store.current=current; saveStore(); }
-['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','zipName']
+['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','zipName','sliceStart']
 .forEach(function(id){
   $(id).addEventListener('change',function(){ syncConditional(); updateFmtHint(); saveSettingsToProfile(); });
 });
 if($('imageCount')) $('imageCount').addEventListener('input',function(){ updateGridModeFields(); });
 if($('zipName')) $('zipName').addEventListener('input',updateZipNamePreview);
+if($('sliceStart')) $('sliceStart').addEventListener('input',updateSliceStartPreview);
 
 $('start').addEventListener('click',function(){ if(!busy) run(); });
 
@@ -338,6 +369,7 @@ function formDataFor(s){
   fd.append('scan_step',String(s.scan_step));
     fd.append('ignorable_pixels',String(s.ignorable_pixels));
     fd.append('zip_name',s.zip_name||defaultSettings.zip_name);
+    fd.append('slice_start',s.slice_start||defaultSettings.slice_start);
     fd.append('last_browse_location',s.last_browse_location||'');
 
   return fd;
