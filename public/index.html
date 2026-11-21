@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>SmartStitch Web</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="ss-layout">
+  <main class="ss-main">
+
+    <div class="ss-app" id="ss-root">
+      <div class="ss-card">
+        <div class="ss-head">
+          <div class="ss-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2.5" width="14" height="8" rx="1.6"/><rect x="5" y="13.5" width="14" height="8" rx="1.6"/>
+              <path d="M9 6.5h6M9 17.5h6"/>
+            </svg>
+          </div>
+          <div>
+            <span class="ss-kicker">Server Processing Workspace / v6.2</span>
+            <h1>SmartStitch Web</h1>
+            <p>Stitch &amp; Slice Gambar — diproses di server, file sementara di Cloudflare R2.</p>
+          </div>
+        </div>
+
+        <div class="ss-tabs" role="tablist">
+          <button class="ss-tab active" data-panel="basic">Basic</button>
+          <button class="ss-tab" data-panel="advanced">Advanced</button>
+          <button class="ss-tab" data-panel="post">Post Process</button>
+          <button class="ss-tab" data-panel="about">Tentang</button>
+        </div>
+
+        <div class="ss-body">
+          <section class="ss-panel active" id="panel-basic">
+            <fieldset class="ss-group">
+              <legend>Input / Output Settings</legend>
+              <div class="ss-field">
+                <label>Gambar Input (pilih beberapa / satu folder)</label>
+                <div class="ss-drop" id="drop">
+                  <strong>Klik atau tarik gambar ke sini</strong>
+                  <span>PNG, JPG, JFIF, WEBP, BMP, TIFF, TGA, PSD, PSB · diurutkan otomatis (natural sort)</span>
+                  <input type="file" id="files" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.bmp,.tif,.tiff,.tga,.psd,.psb" multiple="multiple" hidden="hidden"/>
+                  <button class="ss-btn small" type="button" id="folderButton" style="margin-top:10px">Pilih Folder</button>
+                  <input type="file" id="folderInput" webkitdirectory="webkitdirectory" directory="directory" multiple="multiple" hidden="hidden"/>
+                </div>
+                <div class="ss-filelist" id="filelist"></div>
+              </div>
+            </fieldset>
+
+            <fieldset class="ss-group">
+              <legend>General Settings</legend>
+              <div class="ss-grid">
+                <div class="ss-field">
+                  <label for="outputType">Output File Type</label>
+                  <select id="outputType">
+                    <option>.png</option><option>.jpg</option><option>.webp</option>
+                    <option>.bmp</option><option>.tiff</option><option>.tga</option><option>.psd</option><option>.psb</option>
+                  </select>
+                  <div class="ss-hint" id="fmtHint"></div>
+                </div>
+                <div class="ss-field" id="qualityWrap">
+                  <label for="quality">Lossy File Quality [1-100%]</label>
+                  <input type="number" id="quality" min="1" max="100" value="100"/>
+                  <div class="ss-hint">Berlaku untuk JPG, WEBP &amp; TIFF.</div>
+                </div>
+                <div class="ss-field">
+                  <label for="height">Rough Output Height</label>
+                  <input type="number" id="height" min="1" max="999999999" value="5000"/>
+                  <div class="ss-hint">Tinggi perkiraan tiap potongan (split_height).</div>
+                </div>
+                <div class="ss-field">
+                  <label for="enforce">Width Enforcement Type</label>
+                  <select id="enforce">
+                    <option value="0">No Enforcement</option>
+                    <option value="1">Automatic Uniform Width</option>
+                    <option value="2">User Customized Width</option>
+                  </select>
+                </div>
+                <div class="ss-field" id="customWrap" style="display:none">
+                  <label for="customWidth">Manual Custom Width [pixel]</label>
+                  <input type="number" id="customWidth" min="1" max="999999999" value="720"/>
+                </div>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="ss-panel" id="panel-advanced">
+            <fieldset class="ss-group">
+              <legend>Detector Settings</legend>
+              <div class="ss-grid">
+                <div class="ss-field">
+                  <label for="detector">Detector Type</label>
+                  <select id="detector">
+                    <option value="0">Direct Slicing</option>
+                    <option value="1">Smart Pixel Comparison</option>
+                  </select>
+                  <div class="ss-hint">Direct = potong tiap tinggi tetap. Smart = cari baris kosong terdekat.</div>
+                </div>
+              </div>
+              <div class="ss-grid" id="smartOpts" style="margin-top:14px">
+                <div class="ss-field">
+                  <label for="sensitivity">Object Detection Sensitivity [1-100%]</label>
+                  <input type="number" id="sensitivity" min="1" max="100" value="90"/>
+                </div>
+                <div class="ss-field">
+                  <label for="scanStep">Scan Line Step [1-25 pixel]</label>
+                  <input type="number" id="scanStep" min="1" max="25" value="5"/>
+                </div>
+                <div class="ss-field">
+                  <label for="ignoreMargin">Ignoreable Horizontal Margins [pixel]</label>
+                  <input type="number" id="ignoreMargin" min="0" max="999999" value="5"/>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="ss-group">
+              <legend>Configuration Profile Settings</legend>
+              <div class="ss-row-profile">
+                <select id="profileSelect"></select>
+                <button class="ss-btn small" id="addProfile">Add</button>
+                <button class="ss-btn small" id="delProfile">Delete</button>
+              </div>
+              <div class="ss-field" style="margin-top:12px">
+                <label for="profileName">Current Profile Name</label>
+                <input type="text" id="profileName"/>
+              </div>
+              <div class="ss-hint" style="margin-top:8px">Profil tersimpan di browser (localStorage) — setara settings.json di aplikasi desktop.</div>
+            </fieldset>
+          </section>
+
+          <section class="ss-panel" id="panel-post">
+            <fieldset class="ss-group">
+              <legend>Post Process Settings</legend>
+              <label class="ss-check">
+                <input type="checkbox" id="runPost"/> Jalankan post-process setelah proses selesai
+              </label>
+              <div class="ss-field" id="postAppWrap" style="margin-top:12px">
+                <label for="postprocessApp">Post process application</label>
+                <select id="postprocessApp"><option value="">-</option></select>
+                <div class="ss-hint" id="postConfigHint"></div>
+              </div>
+              <div class="ss-field" id="postArgsWrap" style="margin-top:12px">
+                <label for="postprocessArgs">Post process arguments</label>
+                <input type="text" id="postprocessArgs" placeholder="[stitched] [processed]"/>
+                <div class="ss-hint">Placeholder: <code>[stitched]</code> = gambar gabungan, <code>[processed]</code> = folder output.</div>
+              </div>
+            </fieldset>
+            <div class="ss-note" style="padding:0">
+              Catatan privasi: gambar diunggah ke server Anda dan disimpan sementara di Cloudflare R2. Setelah ZIP selesai dibuat, semua objek R2 untuk job ini dihapus otomatis.
+            </div>
+          </section>
+
+          <section class="ss-panel" id="panel-about">
+            <div class="ss-about">
+              <h3>Ringkasan</h3>
+              <p><strong>SmartStitch Web</strong> adalah implementasi server-side untuk aplikasi desktop Windows <em>SmartStitch</em> karya MechTechnology. Perilaku pemrosesan direkonstruksi dari artefak <code>SmartStitch.exe</code> (PyInstaller, PySide6, Python 3.10) dan diselaraskan dengan dokumentasi sumber terbuka proyek.</p>
+
+              <h3>Pipeline Pemrosesan</h3>
+              <ol>
+                <li>Memuat seluruh berkas gambar dan mengurutkannya secara natural.</li>
+                <li>Menyesuaikan lebar sesuai mode <em>Width Enforcement</em>.</li>
+                <li>Menggabungkan gambar menjadi satu kanvas vertikal.</li>
+                <li>Menentukan titik potong melalui <em>Direct Slicing</em> atau <em>Smart Pixel Comparison</em>.</li>
+                <li>Mengekspor setiap segmen ke format yang dipilih dengan tingkat kualitas tertentu.</li>
+              </ol>
+
+              <h3>Keselarasan Implementasi</h3>
+              <p>Mode otomatis menggunakan lebar terkecil, tinggi hasil resize dibulatkan ke bawah, kanvas gabungan berlatar hitam, batas segmen akhir adalah <code>height-1</code>, dan detektor pintar membandingkan piksel horizontal pada baris yang berdekatan. Penamaan berkas mengikuti format dua digit (<code>01.ext</code>, <code>02.ext</code>).</p>
+
+              <h3>Privasi &amp; Kompatibilitas</h3>
+              <p>Gambar diproses di server dengan Node.js, Sharp, dan ag-psd. Input, kanvas gabungan, dan output disimpan sementara di bucket R2 lalu dihapus setelah arsip ZIP selesai dibuat. Format input/output yang didukung: <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, dan <code>PSB</code>. Profil konfigurasi disimpan di <code>localStorage</code> dengan schema field yang sama dengan <code>settings.json</code> pada versi desktop.</p>
+
+              <div class="ss-note" style="padding:0">Tampilan antarmuka menggunakan pendekatan SaaS modern dan tidak mereplika stylesheet aplikasi desktop.</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="ss-status">
+          <div class="msg" id="status">Idle — siap memproses.</div>
+          <div class="ss-bar"><i id="bar"></i></div>
+          <button class="ss-btn primary" id="start">Start Process</button>
+        </div>
+        <pre class="ss-log" id="log"></pre>
+        <div class="ss-preview" id="preview">
+          <h3>Hasil Slice — arsip ZIP siap diunduh</h3>
+          <div class="ss-strip" id="strip"></div>
+        </div>
+        <div class="ss-note" id="fmtNote">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB. Proses berjalan di server; objek R2 sementara dihapus setelah selesai.</div>
+      </div>
+      <div class="ss-foot">SmartStitch Web · pemrosesan server-side · penyimpanan sementara Cloudflare R2 dengan auto cleanup</div>
+    </div>
+    <div class="ss-toast" id="toast"></div>
+
+  </main>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
