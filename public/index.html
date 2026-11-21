@@ -29,7 +29,7 @@
         <div class="ss-tabs" role="tablist">
           <button class="ss-tab active" data-panel="basic">Dasar</button>
           <button class="ss-tab" data-panel="advanced">Lanjutan</button>
-          <button class="ss-tab" data-panel="post">Pasca-Proses</button>
+          <button class="ss-tab" data-panel="filename">Nama File</button>
           <button class="ss-tab" data-panel="about">Tentang</button>
         </div>
 
@@ -160,25 +160,24 @@
             </fieldset>
           </section>
 
-          <section class="ss-panel" id="panel-post">
+          <section class="ss-panel" id="panel-filename">
             <fieldset class="ss-group">
-              <legend>Pasca-Pemrosesan</legend>
-              <label class="ss-check">
-                <input type="checkbox" id="runPost"/> Jalankan pasca-pemrosesan setelah gambar selesai disusun
-              </label>
-              <div class="ss-field" id="postAppWrap" style="margin-top:12px">
-                <label for="postprocessApp">Aplikasi Pasca-Pemrosesan</label>
-                <select id="postprocessApp"><option value="">-</option></select>
-                <div class="ss-hint" id="postConfigHint"></div>
-              </div>
-              <div class="ss-field" id="postArgsWrap" style="margin-top:12px">
-                <label for="postprocessArgs">Argumen Pasca-Pemrosesan</label>
-                <input type="text" id="postprocessArgs" placeholder="[stitched] [processed]"/>
-                <div class="ss-hint">Variabel: <code>[stitched]</code> untuk kanvas gabungan, <code>[processed]</code> untuk folder hasil.</div>
+              <legend>Nama File Output</legend>
+              <div class="ss-grid">
+                <div class="ss-field">
+                  <label for="filenamePrefix">Prefiks Nama</label>
+                  <input type="text" id="filenamePrefix" maxlength="40" placeholder="Misalnya SS_"/>
+                  <div class="ss-hint">Awalan sebelum nomor, misalnya <code>SS_</code> menghasilkan <code>SS_01.png</code>.</div>
+                </div>
+                <div class="ss-field">
+                  <label for="filenameStart">Nomor Awal</label>
+                  <input type="number" id="filenameStart" min="1" max="999999" value="1"/>
+                  <div class="ss-hint" id="filenamePreview">01.png … 04.png</div>
+                </div>
               </div>
             </fieldset>
             <div class="ss-note" style="padding:0">
-              File diproses di server dan disimpan sementara selama proses berlangsung. Semua data sementara dihapus otomatis setelah arsip ZIP siap.
+              Nomor otomatis bertambah untuk setiap potongan. Karakter khusus pada prefiks diganti menjadi underscore agar nama file tetap aman.
             </div>
           </section>
 

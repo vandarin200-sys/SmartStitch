@@ -20,18 +20,8 @@ const {
   parseSettings,
   processInputGroups,
   naturalCompare,
-  isSupportedInput,
-  zipStore
+  isSupportedInput
 } = require('./lib/processor');
-const {
-  allowedApps,
-  cleanupWorkDir,
-  createWorkDir,
-  readOutputFiles,
-  runPostprocess,
-  writeWorkFile
-} = require('./lib/postprocess');
-
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT = path.join(__dirname, 'public');
@@ -281,7 +271,6 @@ async function handleUploadCleanup(req, res) {
 
 async function handleProcess(req, res) {
   let session = null;
-  let workDir = null;
 
   try {
     if (!configured()) {
@@ -335,23 +324,10 @@ async function handleProcess(req, res) {
 
     const settings = parseSettings(fields);
     const grid = settings.grid_mode === 'count' ? gridShape(settings.image_count, settings.direction) : null;
-    const postKey = String(fields.postprocess_app || '').trim();
-    const postArgs = String(fields.postprocess_args || '');
-
-    if (settings.run_postprocess && !postKey) {
-      throw new Error('Post-process aktif tetapi aplikasi belum dipilih.');
-    }
-    if (postKey && allowedApps().indexOf(postKey) === -1) {
-      throw new Error('Aplikasi post-process tidak diizinkan.');
-    }
 
     if (!fromR2) {
       session = createUploadSession();
       jobId = session.jobId;
-    }
-    workDir = await createWorkDir(jobId);
-
-    if (!fromR2) {
       for (let i = 0; i < inputs.length; i++) {
         await session.put('input', String(i + 1).padStart(3, '0') + '-' + inputs[i].name, inputs[i].buffer);
       }
@@ -362,32 +338,16 @@ async function handleProcess(req, res) {
         console.log('[' + jobId + '] ' + message);
       },
       async onCombined(name, buffer) {
-        await writeWorkFile(workDir, 'combined', name, buffer);
         await session.put('combined', name, buffer);
       },
       async onOutput(name, buffer) {
-        await writeWorkFile(workDir, 'output', name, buffer);
+        await session.put('output', name, buffer);
       }
     });
 
-    let postInfo = { status: 'skipped', exitCode: null };
-    if (settings.run_postprocess) {
-      postInfo = await runPostprocess(postKey, postArgs, workDir, (message) => {
-        console.log('[' + jobId + '] ' + message);
-      });
-      postInfo.status = 'ok';
-    }
-
-    const finalOutputs = await readOutputFiles(workDir);
-    for (const item of finalOutputs) {
-      await session.put('output', item.name, item.buffer);
-    }
-    const zipBuffer = zipStore(finalOutputs);
-
+    const zipBuffer = result.zipBuffer;
     const cleaned = await session.cleanup();
     session = null;
-    await cleanupWorkDir(workDir);
-    workDir = null;
 
     if (res.writableEnded || res.destroyed) return;
 
@@ -403,18 +363,13 @@ async function handleProcess(req, res) {
       'X-Input-Dirs': String(result.stats.groups),
       'X-Process-Ms': String(Date.now() - started),
       'X-R2-Deleted': String(cleaned.deleted),
-      'X-R2-Cleanup-Failed': String(cleaned.failed),
-      'X-Postprocess': postInfo.status,
-      'X-Postprocess-Exit': postInfo.exitCode == null ? '' : String(postInfo.exitCode)
+      'X-R2-Cleanup-Failed': String(cleaned.failed)
     });
     res.end(zipBuffer);
   } catch (err) {
     console.error('[process] gagal: ' + (err && err.stack ? err.stack : err));
     if (session) {
       try { await session.cleanup(); } catch (cleanupErr) { console.error('[r2] cleanup darurat gagal: ' + cleanupErr.message); }
-    }
-    if (workDir) {
-      try { await cleanupWorkDir(workDir); } catch (cleanupErr) { console.error('[temp] cleanup darurat gagal: ' + cleanupErr.message); }
     }
     if (res.writableEnded || res.destroyed) return;
     sendJson(res, statusForError(err), {
@@ -471,7 +426,7 @@ function createApp() {
         sendJson(res, 405, { error: 'Gunakan GET untuk /api/config.' });
         return;
       }
-      sendJson(res, 200, { postprocessApps: allowedApps() });
+      sendJson(res, 200, { filename: { prefixMaxLength: 40, startMax: 999999 } });
       return;
     }
 

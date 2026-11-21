@@ -13,11 +13,15 @@ var defaultSettings = {
   direction:'vertical', grid_mode:'custom', image_count:4,
   split_height:5000, output_type:'.tga', lossy_quality:100,
   detector_type:1, senstivity:90, ignorable_pixels:5, scan_step:5,
-  enforce_type:2, enforce_width:720, run_postprocess:false,
-  postprocess_app:'', postprocess_args:'', last_browse_location:''
+  enforce_type:2, enforce_width:720,
+  filename_prefix:'', filename_start:1, last_browse_location:''
 };
 var defaultProfiles = [Object.assign({},defaultSettings)];
 var store = loadStore();
+
+function sanitizePrefix(v){
+  return String(v==null?'':v).replace(/[^\p{L}\p{N}_-]+/gu,'_').replace(/^_+/,'').slice(0,40);
+}
 var current = Math.min(store.current||0, store.profiles.length-1);
 
 function normalizeProfile(p){
@@ -35,7 +39,8 @@ function normalizeProfile(p){
   s.ignorable_pixels = clamp(+s.ignorable_pixels,0,999999,defaultSettings.ignorable_pixels);
   s.enforce_type = clamp(+s.enforce_type,0,2,defaultSettings.enforce_type);
   s.enforce_width = clamp(+s.enforce_width,1,999999999,defaultSettings.enforce_width);
-  s.run_postprocess = !!s.run_postprocess;
+  s.filename_prefix = sanitizePrefix(s.filename_prefix);
+  s.filename_start = Math.round(clamp(+s.filename_start,1,999999,defaultSettings.filename_start));
   return s;
 }
 function loadStore(){
@@ -67,9 +72,8 @@ function readSettings(){
     senstivity:clamp(+$('sensitivity').value,1,100,90),
     scan_step:clamp(+$('scanStep').value,1,25,5),
     ignorable_pixels:clamp(+$('ignoreMargin').value,0,999999,5),
-    run_postprocess:$('runPost').checked,
-    postprocess_app:$('postprocessApp')?$('postprocessApp').value:'',
-    postprocess_args:$('postprocessArgs')?$('postprocessArgs').value:''
+    filename_prefix:sanitizePrefix($('filenamePrefix')?$('filenamePrefix').value:''),
+    filename_start:Math.round(clamp(+$('filenameStart').value,1,999999,1))
   };
 }
 function writeSettings(s){
@@ -86,9 +90,8 @@ function writeSettings(s){
   $('sensitivity').value = val(s.senstivity,90);
   $('scanStep').value = val(s.scan_step,5);
   $('ignoreMargin').value = val(s.ignorable_pixels,5);
-  $('runPost').checked = !!s.run_postprocess;
-  if($('postprocessApp')) $('postprocessApp').value = s.postprocess_app||'';
-  if($('postprocessArgs')) $('postprocessArgs').value = s.postprocess_args||'';
+  if($('filenamePrefix')) $('filenamePrefix').value = s.filename_prefix||'';
+  if($('filenameStart')) $('filenameStart').value = val(s.filename_start,1);
   syncConditional();
   updateFmtHint();
 }
@@ -108,11 +111,25 @@ function formatBytes(n){
   if(n<1048576) return (n/1024).toFixed(1)+' KB';
   return (n/1048576).toFixed(1)+' MB';
 }
+function padNum(n){
+  var s=String(n);
+  while(s.length<2) s='0'+s;
+  return s;
+}
+function updateFilenamePreview(){
+  var el=$('filenamePreview');
+  if(!el) return;
+  var prefix=sanitizePrefix($('filenamePrefix')?$('filenamePrefix').value:'');
+  var start=Math.round(clamp(+$('filenameStart').value,1,999999,1));
+  var ext=$('outputType').value;
+  el.textContent=prefix+padNum(start)+ext+' … '+prefix+padNum(start+3)+ext;
+}
 function updateFmtHint(){
   var f=$('outputType').value;
   var lossy = (f==='.jpg'||f==='.jpeg'||f==='.webp'||f==='.tiff');
   $('qualityWrap').style.display = lossy ? 'flex' : 'none';
   $('fmtHint').textContent = lossy ? 'Kualitas diterapkan saat ekspor.' : 'Format ini tidak menggunakan pengaturan kualitas.';
+  updateFilenamePreview();
 }
 function updateDirectionLabels(){
   var horizontal = $('direction').value === 'horizontal';
@@ -183,9 +200,7 @@ function syncConditional(){
   updateGridModeFields();
   $('customWrap').style.display = ($('enforce').value==='2')?'flex':'none';
   $('smartOpts').style.display = ($('detector').value==='1')?'grid':'none';
-  var post = $('runPost').checked;
-  if($('postAppWrap')) $('postAppWrap').style.display = post?'block':'none';
-  if($('postArgsWrap')) $('postArgsWrap').style.display = post?'block':'none';
+  updateFilenamePreview();
 }
 
 Array.prototype.forEach.call(document.querySelectorAll('.ss-tab'),function(btn){
@@ -268,7 +283,8 @@ function enhanceSelect(el){
   el.addEventListener('change',render);
   render();
 }
-function enhanceSelects(){ ['direction','gridMode','outputType','enforce','detector','profileSelect','postprocessApp'].forEach(function(id){ var el=$(id); if(el && !el.classList.contains('ss-native')) enhanceSelect(el); }); }
+function enhanceSelects(){ ['direction','gridMode','outputType','enforce','detector','profileSelect'].forEach(function(id){
+ var el=$(id); if(el && !el.classList.contains('ss-native')) enhanceSelect(el); }); }
 document.addEventListener('click',closeAllSelects);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAllSelects(); });
 
@@ -302,10 +318,12 @@ $('delProfile').addEventListener('click',function(){
   renderProfiles(); writeSettings(cur()); toast('Profil dihapus.');
 });
 function saveSettingsToProfile(){ Object.assign(cur(),readSettings()); store.current=current; saveStore(); }
-['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','runPost','postprocessApp','postprocessArgs'].forEach(function(id){
+['direction','gridMode','outputType','quality','height','imageCount','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','filenamePrefix','filenameStart'].forEach(function(id){
   $(id).addEventListener('change',function(){ syncConditional(); updateFmtHint(); saveSettingsToProfile(); });
 });
 if($('imageCount')) $('imageCount').addEventListener('input',function(){ updateGridModeFields(); });
+if($('filenamePrefix')) $('filenamePrefix').addEventListener('input',updateFilenamePreview);
+if($('filenameStart')) $('filenameStart').addEventListener('input',updateFilenamePreview);
 
 $('start').addEventListener('click',function(){ if(!busy) run(); });
 
@@ -326,11 +344,11 @@ function formDataFor(s){
   fd.append('detector_type',String(s.detector_type));
   fd.append('senstivity',String(s.senstivity));
   fd.append('scan_step',String(s.scan_step));
-  fd.append('ignorable_pixels',String(s.ignorable_pixels));
-  fd.append('run_postprocess',s.run_postprocess?'true':'false');
-  fd.append('postprocess_app',s.postprocess_app||'');
-  fd.append('postprocess_args',s.postprocess_args||'');
-  fd.append('last_browse_location',s.last_browse_location||'');
+    fd.append('ignorable_pixels',String(s.ignorable_pixels));
+    fd.append('filename_prefix',s.filename_prefix||'');
+    fd.append('filename_start',String(s.filename_start||1));
+    fd.append('last_browse_location',s.last_browse_location||'');
+
   return fd;
 }
 function blobText(blob){
@@ -386,26 +404,6 @@ if($('zipModalBackdrop')) $('zipModalBackdrop').addEventListener('click',closeZi
 if($('zipModalDownload')) $('zipModalDownload').addEventListener('click',downloadZip);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeZipModal(); });
 
-function loadPostprocessApps(){
-  var sel=$('postprocessApp');
-  if(!sel) return Promise.resolve();
-  return fetch('/api/config').then(function(r){ return r.json(); }).then(function(cfg){
-    var apps=(cfg&&cfg.postprocessApps)||[];
-    sel.innerHTML='<option value="">-</option>';
-    apps.forEach(function(name){
-      var o=document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o);
-    });
-    if(apps.indexOf(cur().postprocess_app)===-1) cur().postprocess_app='';
-    sel.value=cur().postprocess_app||'';
-    if($('postConfigHint')) $('postConfigHint').textContent=apps.length
-      ? apps.length+' aplikasi tersedia pada server.'
-      : 'Belum ada aplikasi pasca-pemrosesan yang tersedia.';
-    refreshSelect(sel);
-    syncConditional();
-  }).catch(function(){
-    if($('postConfigHint')) $('postConfigHint').textContent='Daftar aplikasi pasca-pemrosesan tidak dapat dimuat.';
-  });
-}
 
 function requestError(stage, message){
   var err=new Error(message);
@@ -539,7 +537,6 @@ function finishResult(result, s, t0){
   if(failed!=='0') toast('Proses selesai, tetapi sebagian berkas sementara tidak dapat dibersihkan.');
   else toast('Proses selesai. Arsip siap diunduh.');
   setStatus('Proses selesai dalam '+dt.toFixed(3)+' detik.',100);
-  if(s.run_postprocess) downloadZip();
 }
 function cleanupUpload(jobId){
   if(!jobId) return Promise.resolve();
@@ -592,6 +589,6 @@ renderProfiles();
 enhanceSelects();
 updateFmtHint();
 syncConditional();
-loadPostprocessApps();
-setStatus(files.length ? 'Siap memproses '+files.length+' gambar.' : 'Siap memproses gambar.',0);
+setStatus(
+files.length ? 'Siap memproses '+files.length+' gambar.' : 'Siap memproses gambar.',0);
 })();

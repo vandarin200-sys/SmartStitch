@@ -1,4 +1,3 @@
-const { allowedApps } = require('../lib/postprocess');
 const { sendJson } = require('../server');
 
 module.exports = function configHandler(req, res) {
@@ -6,5 +5,5 @@ module.exports = function configHandler(req, res) {
     sendJson(res, 405, { error: 'Gunakan GET untuk /api/config.' });
     return;
   }
-  sendJson(res, 200, { postprocessApps: allowedApps() });
+  sendJson(res, 200, { filename: { prefixMaxLength: 40, startMax: 999999 } });
 };
