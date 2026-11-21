@@ -10,7 +10,7 @@ var busy = false;
 var KEY = 'smartstitch_web_profiles_v1';
 var defaultSettings = {
   profile_name:'Settings Profile 1',
-  split_height:5000, output_type:'.tga', lossy_quality:100,
+  direction:'vertical', split_height:5000, output_type:'.tga', lossy_quality:100,
   detector_type:1, senstivity:90, ignorable_pixels:5, scan_step:5,
   enforce_type:2, enforce_width:720, run_postprocess:false,
   postprocess_app:'', postprocess_args:'', last_browse_location:''
@@ -22,6 +22,7 @@ var current = Math.min(store.current||0, store.profiles.length-1);
 function normalizeProfile(p){
   var s = Object.assign({},defaultSettings,p&&p.settings?p.settings:null,p);
   s.profile_name = s.profile_name || s.name || defaultSettings.profile_name;
+  s.direction = s.direction === 'horizontal' ? 'horizontal' : 'vertical';
   s.output_type = s.output_type || defaultSettings.output_type;
   s.split_height = clamp(+s.split_height,1,999999999,defaultSettings.split_height);
   s.lossy_quality = clamp(+s.lossy_quality,1,100,defaultSettings.lossy_quality);
@@ -51,6 +52,7 @@ function cur(){ return store.profiles[current]; }
 function val(v,d){ return (v==null||v==='')?d:v; }
 function readSettings(){
   return {
+    direction:$('direction').value,
     output_type:$('outputType').value,
     lossy_quality:clamp(+$('quality').value,1,100,100),
     split_height:clamp(+$('height').value,1,999999999,5000),
@@ -67,6 +69,7 @@ function readSettings(){
 }
 function writeSettings(s){
   s = s || defaultSettings;
+  $('direction').value = s.direction === 'horizontal' ? 'horizontal' : 'vertical';
   $('outputType').value = val(s.output_type,'.tga');
   $('quality').value = val(s.lossy_quality,100);
   $('height').value = val(s.split_height,5000);
@@ -104,7 +107,19 @@ function updateFmtHint(){
   $('qualityWrap').style.display = lossy ? 'flex' : 'none';
   $('fmtHint').textContent = lossy ? 'Quality diterapkan server saat encode.' : 'Format ini tidak memakai quality.';
 }
+function updateDirectionLabels(){
+  var horizontal = $('direction').value === 'horizontal';
+  if($('heightLabel')) $('heightLabel').textContent = horizontal ? 'Rough Output Width' : 'Rough Output Height';
+  if($('heightHint')) $('heightHint').textContent = horizontal
+    ? 'Perkiraan lebar tiap potongan (split_height).'
+    : 'Tinggi perkiraan tiap potongan (split_height).';
+  if($('enforceLabel')) $('enforceLabel').textContent = horizontal ? 'Height Enforcement Type' : 'Width Enforcement Type';
+  if($('customWidthLabel')) $('customWidthLabel').textContent = horizontal
+    ? 'Manual Custom Height [pixel]'
+    : 'Manual Custom Width [pixel]';
+}
 function syncConditional(){
+  updateDirectionLabels();
   $('customWrap').style.display = ($('enforce').value==='2')?'flex':'none';
   $('smartOpts').style.display = ($('detector').value==='1')?'grid':'none';
   var post = $('runPost').checked;
@@ -191,7 +206,7 @@ function enhanceSelect(el){
   el.addEventListener('change',render);
   render();
 }
-function enhanceSelects(){ ['outputType','enforce','detector','profileSelect','postprocessApp'].forEach(function(id){ var el=$(id); if(el && !el.classList.contains('ss-native')) enhanceSelect(el); }); }
+function enhanceSelects(){ ['direction','outputType','enforce','detector','profileSelect','postprocessApp'].forEach(function(id){ var el=$(id); if(el && !el.classList.contains('ss-native')) enhanceSelect(el); }); }
 document.addEventListener('click',closeAllSelects);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeAllSelects(); });
 
@@ -225,7 +240,7 @@ $('delProfile').addEventListener('click',function(){
   renderProfiles(); writeSettings(cur()); toast('Profil dihapus.');
 });
 function saveSettingsToProfile(){ Object.assign(cur(),readSettings()); store.current=current; saveStore(); }
-['outputType','quality','height','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','runPost','postprocessApp','postprocessArgs'].forEach(function(id){
+['direction','outputType','quality','height','enforce','customWidth','detector','sensitivity','scanStep','ignoreMargin','runPost','postprocessApp','postprocessArgs'].forEach(function(id){
   $(id).addEventListener('change',function(){ syncConditional(); updateFmtHint(); saveSettingsToProfile(); });
 });
 
@@ -237,6 +252,7 @@ function formDataFor(s){
     if(f.relativePath && f.relativePath!==f.name) fd.append('file:'+encodeURIComponent(f.relativePath),f.file,f.name);
     else fd.append('files',f.file,f.name);
   });
+  fd.append('direction',s.direction||'vertical');
   fd.append('output_type',s.output_type);
   fd.append('lossy_quality',String(s.lossy_quality));
   fd.append('split_height',String(s.split_height));

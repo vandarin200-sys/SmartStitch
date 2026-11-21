@@ -55,6 +55,14 @@
               <legend>General Settings</legend>
               <div class="ss-grid">
                 <div class="ss-field">
+                  <label for="direction">Stitch Direction</label>
+                  <select id="direction">
+                    <option value="vertical">Vertical — gabung atas/bawah</option>
+                    <option value="horizontal">Horizontal — gabung kiri/kanan</option>
+                  </select>
+                  <div class="ss-hint">Mode horizontal meresizing tinggi dan memotong sepanjang lebar.</div>
+                </div>
+                <div class="ss-field">
                   <label for="outputType">Output File Type</label>
                   <select id="outputType">
                     <option>.png</option><option>.jpg</option><option>.webp</option>
@@ -68,20 +76,20 @@
                   <div class="ss-hint">Berlaku untuk JPG, WEBP &amp; TIFF.</div>
                 </div>
                 <div class="ss-field">
-                  <label for="height">Rough Output Height</label>
+                  <label for="height" id="heightLabel">Rough Output Height</label>
                   <input type="number" id="height" min="1" max="999999999" value="5000"/>
-                  <div class="ss-hint">Tinggi perkiraan tiap potongan (split_height).</div>
+                  <div class="ss-hint" id="heightHint">Tinggi perkiraan tiap potongan (split_height).</div>
                 </div>
                 <div class="ss-field">
-                  <label for="enforce">Width Enforcement Type</label>
+                  <label for="enforce" id="enforceLabel">Width Enforcement Type</label>
                   <select id="enforce">
                     <option value="0">No Enforcement</option>
-                    <option value="1">Automatic Uniform Width</option>
-                    <option value="2">User Customized Width</option>
+                    <option value="1">Automatic Uniform Size</option>
+                    <option value="2">User Customized Size</option>
                   </select>
                 </div>
                 <div class="ss-field" id="customWrap" style="display:none">
-                  <label for="customWidth">Manual Custom Width [pixel]</label>
+                  <label for="customWidth" id="customWidthLabel">Manual Custom Width [pixel]</label>
                   <input type="number" id="customWidth" min="1" max="999999999" value="720"/>
                 </div>
               </div>
@@ -163,8 +171,9 @@
               <ol>
                 <li>Memuat seluruh berkas gambar dan mengurutkannya secara natural.</li>
                 <li>Menyesuaikan lebar sesuai mode <em>Width Enforcement</em>.</li>
-                <li>Menggabungkan gambar menjadi satu kanvas vertikal.</li>
-                <li>Menentukan titik potong melalui <em>Direct Slicing</em> atau <em>Smart Pixel Comparison</em>.</li>
+                  <li>Menggabungkan gambar menjadi satu kanvas vertikal atau horizontal.</li>
+                  <li>Menentukan titik potong melalui <em>Direct Slicing</em> atau <em>Smart Pixel Comparison</em> sesuai arah gabungan.</li>
+
                 <li>Mengekspor setiap segmen ke format yang dipilih dengan tingkat kualitas tertentu.</li>
               </ol>
 
