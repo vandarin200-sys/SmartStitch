@@ -1,0 +1,12 @@
+{
+  "framework": null,
+  "functions": {
+    "api/process.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/public/index.html" },
+    { "source": "/(.*)", "destination": "/public/$1" }
+  ]
+}

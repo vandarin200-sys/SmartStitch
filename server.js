@@ -297,47 +297,61 @@ function serveStatic(req, res, urlPath) {
   });
 }
 
-const server = http.createServer((req, res) => {
-  let urlPath = '/';
-  try {
-    urlPath = (req.url || '/').split('?')[0];
-  } catch (err) {
-    sendJson(res, 400, { error: 'Bad request' });
-    return;
-  }
-
-  if (urlPath === '/api/config') {
-    if (req.method !== 'GET') {
-      sendJson(res, 405, { error: 'Gunakan GET untuk /api/config.' });
+function createApp() {
+  const server = http.createServer((req, res) => {
+    let urlPath = '/';
+    try {
+      urlPath = (req.url || '/').split('?')[0];
+    } catch (err) {
+      sendJson(res, 400, { error: 'Bad request' });
       return;
     }
-    sendJson(res, 200, { postprocessApps: allowedApps() });
-    return;
-  }
 
-  if (urlPath === '/api/process') {
-    if (req.method !== 'POST') {
-      sendJson(res, 405, { error: 'Gunakan POST untuk /api/process.' });
+    if (urlPath === '/api/config') {
+      if (req.method !== 'GET') {
+        sendJson(res, 405, { error: 'Gunakan GET untuk /api/config.' });
+        return;
+      }
+      sendJson(res, 200, { postprocessApps: allowedApps() });
       return;
     }
-    handleProcess(req, res);
-    return;
-  }
 
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    sendJson(res, 405, { error: 'Method tidak diizinkan.' });
-    return;
-  }
+    if (urlPath === '/api/process') {
+      if (req.method !== 'POST') {
+        sendJson(res, 405, { error: 'Gunakan POST untuk /api/process.' });
+        return;
+      }
+      handleProcess(req, res);
+      return;
+    }
 
-  serveStatic(req, res, urlPath);
-});
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      sendJson(res, 405, { error: 'Method tidak diizinkan.' });
+      return;
+    }
 
-server.requestTimeout = 15 * 60 * 1000;
-server.headersTimeout = 60 * 1000;
-server.keepAliveTimeout = 30 * 1000;
+    serveStatic(req, res, urlPath);
+  });
 
-server.listen(PORT, HOST, () => {
-  console.log('SmartStitch Web running at http://' + HOST + ':' + PORT);
-  if (configured()) console.log('Cloudflare R2: ready (bucket ' + process.env.R2_BUCKET + ')');
-  else console.log('Cloudflare R2: not configured. Set ' + missingEnv().join(', ') + '.');
-});
+  server.requestTimeout = 15 * 60 * 1000;
+  server.headersTimeout = 60 * 1000;
+  server.keepAliveTimeout = 30 * 1000;
+  return server;
+}
+
+module.exports = {
+  createApp,
+  handleProcess,
+  parseMultipart,
+  sendJson,
+  serveStatic,
+  statusForError
+};
+
+if (require.main === module) {
+  createApp().listen(PORT, HOST, () => {
+    console.log('SmartStitch Web running at http://' + HOST + ':' + PORT);
+    if (configured()) console.log('Cloudflare R2: ready (bucket ' + process.env.R2_BUCKET + ')');
+    else console.log('Cloudflare R2: not configured. Set ' + missingEnv().join(', ') + '.');
+  });
+}
