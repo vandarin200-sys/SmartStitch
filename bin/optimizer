@@ -1,0 +1,104 @@
+#!/bin/sh
+set -eu
+
+input_dir=""
+output_dir=""
+quality=""
+
+usage() {
+  printf 'Usage: optimizer --input DIR --output DIR [--quality N]\n' >&2
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --input)
+      [ "$#" -ge 2 ] || { usage; exit 2; }
+      input_dir=$2
+      shift 2
+      ;;
+    --input=*)
+      input_dir=${1#--input=}
+      shift
+      ;;
+    --output)
+      [ "$#" -ge 2 ] || { usage; exit 2; }
+      output_dir=$2
+      shift 2
+      ;;
+    --output=*)
+      output_dir=${1#--output=}
+      shift
+      ;;
+    --quality)
+      [ "$#" -ge 2 ] || { usage; exit 2; }
+      quality=$2
+      shift 2
+      ;;
+    --quality=*)
+      quality=${1#--quality=}
+      shift
+      ;;
+    --batch)
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      if [ -z "$input_dir" ]; then
+        input_dir=$1
+      elif [ -z "$output_dir" ]; then
+        output_dir=$1
+      else
+        printf 'Argumen tidak dikenali: %s\n' "$1" >&2
+        usage
+        exit 2
+      fi
+      shift
+      ;;
+  esac
+done
+
+[ -n "$output_dir" ] || { usage; exit 2; }
+[ -d "$output_dir" ] || { printf 'Folder output tidak ditemukan: %s\n' "$output_dir" >&2; exit 1; }
+[ -w "$output_dir" ] || { printf 'Folder output tidak dapat ditulis: %s\n' "$output_dir" >&2; exit 1; }
+
+if [ -n "$input_dir" ] && [ ! -d "$input_dir" ]; then
+  printf 'Folder input tidak ditemukan: %s\n' "$input_dir" >&2
+  exit 1
+fi
+
+combined_count=0
+if [ -n "$input_dir" ] && [ -d "$input_dir" ]; then
+  for item in "$input_dir"/*; do
+    if [ -f "$item" ]; then
+      combined_count=$((combined_count + 1))
+    fi
+  done
+fi
+
+slice_count=0
+for item in "$output_dir"/*; do
+  if [ -f "$item" ] && [ "$(basename "$item")" != "POSTPROCESS_OK.txt" ]; then
+    slice_count=$((slice_count + 1))
+  fi
+done
+
+report="$output_dir/POSTPROCESS_OK.txt"
+{
+  printf 'SmartStitch post-processing\n'
+  printf 'Status: OK\n'
+  printf 'Time: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  if [ -n "$input_dir" ]; then
+    printf 'Input: %s\n' "$input_dir"
+  fi
+  printf 'Combined files: %s\n' "$combined_count"
+  printf 'Output files: %s\n' "$slice_count"
+  if [ -n "$quality" ]; then
+    printf 'Quality: %s\n' "$quality"
+  fi
+} > "$report"
+
+printf 'Post-processing selesai: %s\n' "$report"
+exit 0
