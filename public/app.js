@@ -112,7 +112,7 @@ function updateFmtHint(){
   var f=$('outputType').value;
   var lossy = (f==='.jpg'||f==='.jpeg'||f==='.webp'||f==='.tiff');
   $('qualityWrap').style.display = lossy ? 'flex' : 'none';
-  $('fmtHint').textContent = lossy ? 'Quality diterapkan server saat encode.' : 'Format ini tidak memakai quality.';
+  $('fmtHint').textContent = lossy ? 'Kualitas diterapkan saat ekspor.' : 'Format ini tidak menggunakan pengaturan kualitas.';
 }
 function updateDirectionLabels(){
   var horizontal = $('direction').value === 'horizontal';
@@ -120,22 +120,22 @@ function updateDirectionLabels(){
     var countMode = $('gridMode') && $('gridMode').value === 'count';
     $('directionHint').textContent = countMode
       ? (horizontal
-        ? 'Image Count: gambar digabung kiri/kanan; grid lebih banyak kolom.'
-        : 'Image Count: gambar digabung atas/bawah; grid lebih banyak baris.')
+        ? 'Jumlah Gambar: gambar disusun kiri ke kanan dengan lebih banyak kolom.'
+        : 'Jumlah Gambar: gambar disusun atas ke bawah dengan lebih banyak baris.')
       : (horizontal
         ? (files.length === 2
-          ? 'Mode horizontal: 2 gambar — gambar ke-2 otomatis mengikuti ukuran gambar pertama.'
-          : 'Mode horizontal meresizing tinggi dan memotong sepanjang lebar.')
-        : 'Mode vertikal meresizing lebar dan memotong sepanjang tinggi.');
+          ? 'Dua gambar disusun berdampingan; gambar kedua otomatis mengikuti ukuran gambar pertama.'
+          : 'Gambar disusun kiri ke kanan dan dipotong mengikuti lebar.')
+        : 'Gambar disusun atas ke bawah dan dipotong mengikuti tinggi.');
   }
-  if($('heightLabel')) $('heightLabel').textContent = horizontal ? 'Rough Output Width' : 'Rough Output Height';
+  if($('heightLabel')) $('heightLabel').textContent = horizontal ? 'Perkiraan Lebar Potongan' : 'Perkiraan Tinggi Potongan';
   if($('heightHint')) $('heightHint').textContent = horizontal
-    ? 'Perkiraan lebar tiap potongan (split_height).'
-    : 'Tinggi perkiraan tiap potongan (split_height).';
-  if($('enforceLabel')) $('enforceLabel').textContent = horizontal ? 'Height Enforcement Type' : 'Width Enforcement Type';
+    ? 'Perkiraan lebar setiap potongan.'
+    : 'Perkiraan tinggi setiap potongan.';
+  if($('enforceLabel')) $('enforceLabel').textContent = 'Penyesuaian Ukuran';
   if($('customWidthLabel')) $('customWidthLabel').textContent = horizontal
-    ? 'Manual Custom Height [pixel]'
-    : 'Manual Custom Width [pixel]';
+    ? 'Tinggi Kustom (px)'
+    : 'Lebar Kustom (px)';
 }
 function gridShapeFor(count,direction){
   var n=Math.round(clamp(+count,1,1000,4));
@@ -174,8 +174,8 @@ function updateGridModeFields(){
     var direction=$('direction')&&$('direction').value==='horizontal'?'horizontal':'vertical';
     var shape=gridShapeFor($('imageCount')?$('imageCount').value:4,direction);
     $('gridShapePreview').textContent = (shape.exact
-      ? shape.count+' gambar → '+shape.rows+'×'+shape.cols+' (baris×kolom)'
-      : shape.count+' gambar → '+shape.rows+' baris, kolom per baris: '+shape.columnsPerRow.join(', '))+' · '+direction;
+      ? shape.count+' potongan → '+shape.rows+' baris × '+shape.cols+' kolom'
+      : shape.count+' potongan → '+shape.rows+' baris, kolom per baris: '+shape.columnsPerRow.join(', '))+' · '+(direction==='horizontal'?'horizontal':'vertikal');
   }
 }
 function syncConditional(){
@@ -209,14 +209,14 @@ drop.addEventListener('drop',function(e){ if(e.dataTransfer&&e.dataTransfer.file
 function addFiles(list){
   var arr=Array.prototype.slice.call(list);
   var ok=arr.filter(function(f){ return /\.(png|jpe?g|jfif|webp|bmp|tiff?|tga|ps[bd])$/i.test(f.name); });
-  if(!ok.length){ toast('Tidak ada gambar yang dikenali.'); return; }
+  if(!ok.length){ toast('Format berkas tidak didukung.'); return; }
   ok=ok.map(function(f){
     return {file:f, name:f.name, size:f.size, relativePath:f.webkitRelativePath||f.name};
   });
   files=files.concat(ok);
   files.sort(function(a,b){ return naturalCompare(a.relativePath,b.relativePath); });
   renderFiles();
-  toast(files.length+' gambar siap diunggah.');
+  toast(files.length+' gambar siap diproses.');
 }
 function renderFiles(){
   var el=$('filelist'); el.innerHTML='';
@@ -398,12 +398,12 @@ function loadPostprocessApps(){
     if(apps.indexOf(cur().postprocess_app)===-1) cur().postprocess_app='';
     sel.value=cur().postprocess_app||'';
     if($('postConfigHint')) $('postConfigHint').textContent=apps.length
-      ? apps.length+' aplikasi diizinkan oleh server.'
-      : 'Belum ada aplikasi diizinkan. Set POSTPROCESS_WHITELIST di server.';
+      ? apps.length+' aplikasi tersedia pada server.'
+      : 'Belum ada aplikasi pasca-pemrosesan yang tersedia.';
     refreshSelect(sel);
     syncConditional();
   }).catch(function(){
-    if($('postConfigHint')) $('postConfigHint').textContent='Gagal memuat daftar aplikasi post-process.';
+    if($('postConfigHint')) $('postConfigHint').textContent='Daftar aplikasi pasca-pemrosesan tidak dapat dimuat.';
   });
 }
 
@@ -425,9 +425,9 @@ function putToR2(upload, fileObj, onProgress){
     xhr.upload.addEventListener('progress',onProgress);
     xhr.addEventListener('load',function(){
       if(xhr.status>=200&&xhr.status<300) resolve();
-      else reject(requestError('put','Upload R2 gagal ('+xhr.status+') untuk '+upload.name+'.'));
+      else reject(requestError('put','Unggah berkas gagal ('+xhr.status+') untuk '+upload.name+'.'));
     });
-    xhr.addEventListener('error',function(){ reject(requestError('put','Upload R2 gagal untuk '+upload.name+'.')); });
+    xhr.addEventListener('error',function(){ reject(requestError('put','Unggah berkas gagal untuk '+upload.name+'.')); });
     xhr.send(fileObj.file);
   });
 }
@@ -456,7 +456,7 @@ function runPresigned(s){
         return putToR2(upload,fileObj,function(e){
           if(!e.lengthComputable) return;
           var p=Math.round((uploadedBytes+e.loaded)/totalBytes*35);
-          setStatus('Upload langsung ke R2… '+p+'%',p);
+          setStatus('Mengunggah berkas… '+p+'%',p);
         }).catch(function(err){
           err.jobId=data.jobId;
           throw err;
@@ -465,8 +465,8 @@ function runPresigned(s){
     });
 
     return chain.then(function(){
-      setStatus('Memproses di server — menyimpan sementara di Cloudflare R2…',38);
-      log('Upload langsung ke R2 selesai. Memproses di server…');
+      setStatus('Memproses gambar…',38);
+      log('Berkas berhasil diunggah. Memproses gambar…');
       return new Promise(function(resolve,reject){
         var xhr=new XMLHttpRequest();
         xhr.open('POST','/api/process',true);
@@ -490,8 +490,8 @@ function runPresigned(s){
   });
 }
 function runMultipart(s){
-  setStatus('Mengunggah '+files.length+' gambar ke server…',2);
-  log('Fallback: mengirim gambar lewat multipart ke server.');
+  setStatus('Mengunggah '+files.length+' gambar…',2);
+  log('Mengirim berkas melalui jalur standar.');
   var fake=2;
   var timer=setInterval(function(){ if(fake<88){ fake+=1; $('bar').style.width=fake+'%'; } },420);
 
@@ -502,12 +502,12 @@ function runMultipart(s){
     xhr.upload.addEventListener('progress',function(e){
       if(e.lengthComputable){
         var p=Math.round(e.loaded/e.total*35);
-        setStatus('Mengunggah ke server… '+p+'%',p);
+        setStatus('Mengunggah berkas… '+p+'%',p);
       }
     });
     xhr.upload.addEventListener('load',function(){
-      setStatus('Memproses di server — menyimpan sementara di Cloudflare R2…',38);
-      log('Upload selesai. Server memproses gambar dan menyimpan sementara di R2.');
+      setStatus('Memproses gambar…',38);
+      log('Unggah selesai. Menyusun potongan dan arsip ZIP.');
     });
     xhr.addEventListener('load',function(){
       clearInterval(timer);
@@ -529,18 +529,16 @@ function finishResult(result, s, t0){
   renderResults(result.blob);
   var h=result.headers;
   var slices=h['x-processed-slices']||'?';
-  var deleted=h['x-r2-deleted']||'0';
   var failed=h['x-r2-cleanup-failed']||'0';
-  var job=h['x-job-id']||'-';
   var grid=h['x-grid-shape']||'-';
   var size=result.blob&&result.blob.size?formatBytes(result.blob.size):'-';
   var dt=(performance.now()-t0)/1000;
-  openZipModal('slice: '+slices+' · grid: '+grid+' · '+size);
+  openZipModal('potongan: '+slices+' · tata letak: '+grid+' · '+size);
   log('Selesai dalam '+dt.toFixed(3)+' detik.');
-  log('Job: '+job+' · grid: '+grid+' · slice: '+slices+' · R2 dihapus: '+deleted+' · gagal: '+failed);
-  if(failed!=='0') toast('Proses selesai, tetapi sebagian objek R2 gagal dihapus.');
-  else toast('Selesai — objek R2 sementara sudah dihapus.');
-  setStatus('Idle — Process completed in '+dt.toFixed(3)+' seconds',100);
+  log('Hasil: '+slices+' potongan · tata letak '+grid+' · ukuran '+size+(failed!=='0'?' · '+failed+' berkas sementara tersisa.':'.'));
+  if(failed!=='0') toast('Proses selesai, tetapi sebagian berkas sementara tidak dapat dibersihkan.');
+  else toast('Proses selesai. Arsip siap diunduh.');
+  setStatus('Proses selesai dalam '+dt.toFixed(3)+' detik.',100);
   if(s.run_postprocess) downloadZip();
 }
 function cleanupUpload(jobId){
@@ -553,27 +551,27 @@ function cleanupUpload(jobId){
 }
 function handleRunError(err){
   var msg=err&&err.message?err.message:'Permintaan gagal.';
-  log('ERROR: '+msg);
-  setStatus('Idle — gagal: '+msg,0);
+  log('Proses gagal: '+msg);
+  setStatus('Proses gagal — '+msg,0);
   toast(msg);
 }
 function run(){
-  if(!files.length){ toast('Pilih gambar dulu.'); return; }
+  if(!files.length){ toast('Pilih gambar terlebih dahulu.'); return; }
   busy=true; $('start').disabled=true; $('log').textContent=''; $('log').classList.add('show');
   clearResults();
   var t0=performance.now();
   var s=readSettings();
   Object.assign(cur(),s); saveStore();
 
-  setStatus('Menyiapkan upload langsung ke R2…',2);
-  log('Menyiapkan '+files.length+' upload langsung ke Cloudflare R2.');
+  setStatus('Menyiapkan berkas…',2);
+  log('Menyiapkan '+files.length+' gambar untuk diproses.');
 
   runPresigned(s).then(function(result){
     finishResult(result,s,t0);
     busy=false; $('start').disabled=false;
   }).catch(function(err){
     if(err&&(err.stage==='presign'||err.stage==='put')){
-      log('Upload langsung gagal: '+err.message+' Fallback ke multipart.');
+      log('Unggahan langsung tidak tersedia. Menggunakan jalur standar.');
       return cleanupUpload(err.jobId).then(function(){
         return runMultipart(s);
       }).then(function(result){
@@ -595,5 +593,5 @@ enhanceSelects();
 updateFmtHint();
 syncConditional();
 loadPostprocessApps();
-setStatus('Idle — ' + files.length + ' gambar siap diproses.',0);
+setStatus(files.length ? 'Siap memproses '+files.length+' gambar.' : 'Siap memproses gambar.',0);
 })();

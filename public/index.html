@@ -22,26 +22,26 @@
           </div>
           <div>
             <h1>SmartStitch Web</h1>
-            <p>Stitch &amp; Slice Gambar — diproses di server, file sementara di Cloudflare R2.</p>
+            <p>Gabungkan dan potong gambar dalam satu alur kerja yang rapi, aman, dan siap diunduh.</p>
           </div>
         </div>
 
         <div class="ss-tabs" role="tablist">
-          <button class="ss-tab active" data-panel="basic">Basic</button>
-          <button class="ss-tab" data-panel="advanced">Advanced</button>
-          <button class="ss-tab" data-panel="post">Post Process</button>
+          <button class="ss-tab active" data-panel="basic">Dasar</button>
+          <button class="ss-tab" data-panel="advanced">Lanjutan</button>
+          <button class="ss-tab" data-panel="post">Pasca-Proses</button>
           <button class="ss-tab" data-panel="about">Tentang</button>
         </div>
 
         <div class="ss-body">
           <section class="ss-panel active" id="panel-basic">
             <fieldset class="ss-group">
-              <legend>Input / Output Settings</legend>
+              <legend>Input &amp; Output</legend>
               <div class="ss-field">
-                <label>Gambar Input (pilih beberapa / satu folder)</label>
+                <label>Gambar Input</label>
                 <div class="ss-drop" id="drop">
-                  <strong>Klik atau tarik gambar ke sini</strong>
-                  <span>PNG, JPG, JFIF, WEBP, BMP, TIFF, TGA, PSD, PSB · diurutkan otomatis (natural sort)</span>
+                  <strong>Tarik gambar ke sini, atau klik untuk memilih</strong>
+                  <span>Format didukung: PNG, JPG, JFIF, WEBP, BMP, TIFF, TGA, PSD, PSB · urutan berkas diatur otomatis</span>
                   <input type="file" id="files" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.bmp,.tif,.tiff,.tga,.psd,.psb" multiple="multiple" hidden="hidden"/>
                   <button class="ss-btn small" type="button" id="folderButton" style="margin-top:10px">Pilih Folder</button>
                   <input type="file" id="folderInput" webkitdirectory="webkitdirectory" directory="directory" multiple="multiple" hidden="hidden"/>
@@ -51,18 +51,18 @@
             </fieldset>
 
             <fieldset class="ss-group">
-              <legend>General Settings</legend>
+              <legend>Pengaturan Umum</legend>
               <div class="ss-grid">
                 <div class="ss-field">
-                  <label for="direction">Stitch Direction</label>
+                  <label for="direction">Arah Penggabungan</label>
                   <select id="direction">
-                    <option value="vertical">Vertical — gabung atas/bawah</option>
-                    <option value="horizontal">Horizontal — gabung kiri/kanan</option>
+                    <option value="vertical">Vertikal — atas ke bawah</option>
+                    <option value="horizontal">Horizontal — kiri ke kanan</option>
                   </select>
-                  <div class="ss-hint" id="directionHint">Mode horizontal meresizing tinggi dan memotong sepanjang lebar.</div>
+                  <div class="ss-hint" id="directionHint">Gambar disusun atas ke bawah dan dipotong mengikuti tinggi.</div>
                 </div>
                 <div class="ss-field">
-                  <label for="outputType">Output File Type</label>
+                  <label for="outputType">Format Output</label>
                   <select id="outputType">
                     <option>.png</option><option>.jpg</option><option>.webp</option>
                     <option>.bmp</option><option>.tiff</option><option>.tga</option><option>.psd</option><option>.psb</option>
@@ -70,46 +70,46 @@
                   <div class="ss-hint" id="fmtHint"></div>
                 </div>
                 <div class="ss-field" id="qualityWrap">
-                  <label for="quality">Lossy File Quality [1-100%]</label>
+                  <label for="quality">Kualitas File [1–100%]</label>
                   <input type="number" id="quality" min="1" max="100" value="100"/>
-                  <div class="ss-hint">Berlaku untuk JPG, WEBP &amp; TIFF.</div>
+                  <div class="ss-hint">Berlaku untuk format JPG, WEBP, dan TIFF.</div>
                 </div>
                 <div class="ss-field">
-                  <label for="gridMode">Grid Mode</label>
+                  <label for="gridMode">Mode Tata Letak</label>
                   <select id="gridMode">
-                    <option value="custom">Custom Grid — atur Height &amp; Width sendiri</option>
-                    <option value="count">Image Count — tentukan jumlah gambar</option>
+                    <option value="custom">Kustom — tentukan ukuran potongan</option>
+                    <option value="count">Jumlah Gambar — tentukan jumlah potongan</option>
                   </select>
-                  <div class="ss-hint">Custom Grid memakai tinggi/lebar. Image Count menghitung grid otomatis mengikuti arah: vertikal lebih banyak baris, horizontal lebih banyak kolom.</div>
+                  <div class="ss-hint">Atur ukuran potongan secara manual, atau biarkan sistem menyusun grid otomatis sesuai arah penggabungan.</div>
                 </div>
                 <div class="ss-grid" id="customGridFields" style="grid-column:1/-1">
                   <div class="ss-field">
-                    <label for="height" id="heightLabel">Rough Output Height</label>
+                    <label for="height" id="heightLabel">Perkiraan Tinggi Potongan</label>
                     <input type="number" id="height" min="1" max="999999999" value="5000"/>
-                    <div class="ss-hint" id="heightHint">Tinggi perkiraan tiap potongan (split_height).</div>
+                    <div class="ss-hint" id="heightHint">Perkiraan tinggi setiap potongan.</div>
                   </div>
                   <div class="ss-field">
-                    <label for="enforce" id="enforceLabel">Width Enforcement Type</label>
+                    <label for="enforce" id="enforceLabel">Penyesuaian Ukuran</label>
                     <select id="enforce">
-                      <option value="0">No Enforcement</option>
-                      <option value="1">Automatic Uniform Size</option>
-                      <option value="2">User Customized Size</option>
+                      <option value="0">Tanpa penyesuaian</option>
+                      <option value="1">Ukuran seragam otomatis</option>
+                      <option value="2">Ukuran kustom</option>
                     </select>
                   </div>
                   <div class="ss-field" id="customWrap" style="display:none">
-                    <label for="customWidth" id="customWidthLabel">Manual Custom Width [pixel]</label>
+                    <label for="customWidth" id="customWidthLabel">Lebar Kustom (px)</label>
                     <input type="number" id="customWidth" min="1" max="999999999" value="720"/>
                   </div>
                 </div>
                 <div class="ss-grid" id="countGridFields" style="display:none;grid-column:1/-1">
                   <div class="ss-field">
-                    <label for="imageCount">Jumlah Gambar Output</label>
+                    <label for="imageCount">Jumlah Potongan</label>
                     <input type="number" id="imageCount" min="1" max="1000" value="4"/>
-                    <div class="ss-hint">Jumlah potongan akhir dari kanvas gabungan.</div>
+                    <div class="ss-hint">Jumlah gambar akhir yang dihasilkan dari kanvas gabungan.</div>
                   </div>
                   <div class="ss-field">
-                    <label>Pembagian Grid Otomatis</label>
-                    <div class="ss-hint" id="gridShapePreview">4 gambar → 2×2 (baris×kolom) · vertical</div>
+                    <label>Pratinjau Tata Letak</label>
+                    <div class="ss-hint" id="gridShapePreview">4 potongan → 2 baris × 2 kolom · vertikal</div>
                   </div>
                 </div>
               </div>
@@ -118,109 +118,106 @@
 
           <section class="ss-panel" id="panel-advanced">
             <fieldset class="ss-group">
-              <legend>Detector Settings</legend>
+              <legend>Deteksi Potongan</legend>
               <div class="ss-grid">
                 <div class="ss-field">
-                  <label for="detector">Detector Type</label>
+                  <label for="detector">Metode Deteksi</label>
                   <select id="detector">
-                    <option value="0">Direct Slicing</option>
-                    <option value="1">Smart Pixel Comparison</option>
+                    <option value="0">Potongan Tetap</option>
+                    <option value="1">Perbandingan Piksel Cerdas</option>
                   </select>
-                  <div class="ss-hint">Direct = potong tiap tinggi tetap. Smart = cari baris kosong terdekat.</div>
+                  <div class="ss-hint">Potongan Tetap memotong pada jarak tertentu. Perbandingan Piksel Cerdas mencari baris kosong terdekat.</div>
                 </div>
               </div>
               <div class="ss-grid" id="smartOpts" style="margin-top:14px">
                 <div class="ss-field">
-                  <label for="sensitivity">Object Detection Sensitivity [1-100%]</label>
+                  <label for="sensitivity">Sensitivitas Deteksi [1–100%]</label>
                   <input type="number" id="sensitivity" min="1" max="100" value="90"/>
                 </div>
                 <div class="ss-field">
-                  <label for="scanStep">Scan Line Step [1-25 pixel]</label>
+                  <label for="scanStep">Langkah Pemindaian (1–25 px)</label>
                   <input type="number" id="scanStep" min="1" max="25" value="5"/>
                 </div>
                 <div class="ss-field">
-                  <label for="ignoreMargin">Ignoreable Horizontal Margins [pixel]</label>
+                  <label for="ignoreMargin">Margin Horizontal Diabaikan (px)</label>
                   <input type="number" id="ignoreMargin" min="0" max="999999" value="5"/>
                 </div>
               </div>
             </fieldset>
 
             <fieldset class="ss-group">
-              <legend>Configuration Profile Settings</legend>
+              <legend>Profil Konfigurasi</legend>
               <div class="ss-row-profile">
                 <select id="profileSelect"></select>
-                <button class="ss-btn small" id="addProfile">Add</button>
-                <button class="ss-btn small" id="delProfile">Delete</button>
+                <button class="ss-btn small" id="addProfile">Tambah</button>
+                <button class="ss-btn small" id="delProfile">Hapus</button>
               </div>
               <div class="ss-field" style="margin-top:12px">
-                <label for="profileName">Current Profile Name</label>
+                <label for="profileName">Nama Profil</label>
                 <input type="text" id="profileName"/>
               </div>
-              <div class="ss-hint" style="margin-top:8px">Profil tersimpan di browser (localStorage) — setara settings.json di aplikasi desktop.</div>
+              <div class="ss-hint" style="margin-top:8px">Profil disimpan di browser agar pengaturan favorit dapat digunakan kembali.</div>
             </fieldset>
           </section>
 
           <section class="ss-panel" id="panel-post">
             <fieldset class="ss-group">
-              <legend>Post Process Settings</legend>
+              <legend>Pasca-Pemrosesan</legend>
               <label class="ss-check">
-                <input type="checkbox" id="runPost"/> Jalankan post-process setelah proses selesai
+                <input type="checkbox" id="runPost"/> Jalankan pasca-pemrosesan setelah gambar selesai disusun
               </label>
               <div class="ss-field" id="postAppWrap" style="margin-top:12px">
-                <label for="postprocessApp">Post process application</label>
+                <label for="postprocessApp">Aplikasi Pasca-Pemrosesan</label>
                 <select id="postprocessApp"><option value="">-</option></select>
                 <div class="ss-hint" id="postConfigHint"></div>
               </div>
               <div class="ss-field" id="postArgsWrap" style="margin-top:12px">
-                <label for="postprocessArgs">Post process arguments</label>
+                <label for="postprocessArgs">Argumen Pasca-Pemrosesan</label>
                 <input type="text" id="postprocessArgs" placeholder="[stitched] [processed]"/>
-                <div class="ss-hint">Placeholder: <code>[stitched]</code> = gambar gabungan, <code>[processed]</code> = folder output.</div>
+                <div class="ss-hint">Variabel: <code>[stitched]</code> untuk kanvas gabungan, <code>[processed]</code> untuk folder hasil.</div>
               </div>
             </fieldset>
             <div class="ss-note" style="padding:0">
-              Catatan privasi: gambar diunggah ke server Anda dan disimpan sementara di Cloudflare R2. Setelah ZIP selesai dibuat, semua objek R2 untuk job ini dihapus otomatis.
+              File diproses di server dan disimpan sementara selama proses berlangsung. Semua data sementara dihapus otomatis setelah arsip ZIP siap.
             </div>
           </section>
 
           <section class="ss-panel" id="panel-about">
             <div class="ss-about">
-              <h3>Ringkasan</h3>
-              <p><strong>SmartStitch Web</strong> adalah implementasi server-side untuk aplikasi desktop Windows <em>SmartStitch</em> karya MechTechnology. Perilaku pemrosesan direkonstruksi dari artefak <code>SmartStitch.exe</code> (PyInstaller, PySide6, Python 3.10) dan diselaraskan dengan dokumentasi sumber terbuka proyek.</p>
+              <h3>Tentang SmartStitch</h3>
+              <p><strong>SmartStitch Web</strong> menghadirkan alur kerja penggabungan dan pemotongan gambar dari aplikasi desktop SmartStitch ke dalam browser. Seluruh proses berjalan di server, sehingga perangkat Anda tidak memerlukan aplikasi tambahan.</p>
 
-              <h3>Pipeline Pemrosesan</h3>
+              <h3>Cara Kerja</h3>
               <ol>
-                <li>Memuat seluruh berkas gambar dan mengurutkannya secara natural.</li>
-                <li>Menyesuaikan lebar sesuai mode <em>Width Enforcement</em>.</li>
-                  <li>Menggabungkan gambar menjadi satu kanvas vertikal atau horizontal.</li>
-                  <li>Menentukan titik potong melalui <em>Direct Slicing</em> atau <em>Smart Pixel Comparison</em> sesuai arah gabungan.</li>
-
-                <li>Mengekspor setiap segmen ke format yang dipilih dengan tingkat kualitas tertentu.</li>
+                <li>Mengumpulkan berkas gambar dan mengurutkannya secara otomatis.</li>
+                <li>Menyelaraskan ukuran gambar sesuai pengaturan yang dipilih.</li>
+                <li>Menggabungkan seluruh gambar menjadi satu kanvas vertikal atau horizontal.</li>
+                <li>Menentukan batas potongan dengan metode tetap atau deteksi piksel cerdas.</li>
+                <li>Mengekspor setiap potongan ke format pilihan dan mengemasnya dalam arsip ZIP.</li>
               </ol>
 
-              <h3>Keselarasan Implementasi</h3>
-              <p>Mode otomatis menggunakan lebar terkecil, tinggi hasil resize dibulatkan ke bawah, kanvas gabungan berlatar hitam, batas segmen akhir adalah <code>height-1</code>, dan detektor pintar membandingkan piksel horizontal pada baris yang berdekatan. Penamaan berkas mengikuti format dua digit (<code>01.ext</code>, <code>02.ext</code>).</p>
+              <h3>Hasil &amp; Kompatibilitas</h3>
+              <p>Setiap potongan diberi nama berurutan, mulai dari <code>01.ext</code>. Format yang didukung meliputi <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, dan <code>PSB</code>. Pengaturan favorit dapat disimpan sebagai profil di browser Anda.</p>
 
-              <h3>Privasi &amp; Kompatibilitas</h3>
-              <p>Gambar diproses di server dengan Node.js, Sharp, dan ag-psd. Input, kanvas gabungan, dan output disimpan sementara di bucket R2 lalu dihapus setelah arsip ZIP selesai dibuat. Format input/output yang didukung: <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, dan <code>PSB</code>. Profil konfigurasi disimpan di <code>localStorage</code> dengan schema field yang sama dengan <code>settings.json</code> pada versi desktop.</p>
-
-              <div class="ss-note" style="padding:0">Tampilan antarmuka menggunakan pendekatan SaaS modern dan tidak mereplika stylesheet aplikasi desktop.</div>
+              <h3>Privasi</h3>
+              <p>Berkas hanya disimpan sementara selama proses berlangsung dan dihapus otomatis setelah arsip ZIP tersedia. Profil pengaturan tetap tersimpan secara lokal di browser.</p>
             </div>
           </section>
         </div>
 
         <div class="ss-status">
-          <div class="msg" id="status">Idle — siap memproses.</div>
+          <div class="msg" id="status">Siap memproses gambar.</div>
           <div class="ss-bar"><i id="bar"></i></div>
-          <button class="ss-btn primary" id="start">Start Process</button>
+          <button class="ss-btn primary" id="start">Proses Sekarang</button>
         </div>
         <pre class="ss-log" id="log"></pre>
         <div class="ss-preview" id="preview">
-          <h3>Hasil Slice — arsip ZIP siap diunduh</h3>
+          <h3>Arsip siap diunduh</h3>
           <div class="ss-strip" id="strip"></div>
         </div>
-        <div class="ss-note" id="fmtNote">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB. Proses berjalan di server; objek R2 sementara dihapus setelah selesai.</div>
+        <div class="ss-note" id="fmtNote">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB. Hasil dikemas dalam arsip ZIP dan berkas sementara dihapus otomatis setelah selesai.</div>
       </div>
-      <div class="ss-foot">SmartStitch Web · pemrosesan server-side · penyimpanan sementara Cloudflare R2 dengan auto cleanup</div>
+      <div class="ss-foot">SmartStitch Web · alur kerja penggabungan gambar yang aman dan efisien</div>
     </div>
     <div class="ss-toast" id="toast"></div>
 
@@ -228,10 +225,9 @@
       <div class="ss-modal-backdrop" id="zipModalBackdrop"></div>
       <div class="ss-modal-card" role="document">
         <button class="ss-modal-close" id="zipModalClose" type="button" aria-label="Tutup">&times;</button>
-        <h3 id="zipModalTitle">Proses selesai</h3>
-        <p>Arsip hasil sudah siap diunduh.</p>
+        <h3 id="zipModalTitle">Proses Selesai</h3>
+        <p>Arsip ZIP Anda siap disimpan.</p>
         <div class="ss-modal-file">
-          <span class="ss-modal-file-icon">&#128230;</span>
           <span class="ss-modal-file-text">
             <strong>smartstitch_slices.zip</strong>
             <small id="zipModalMeta">Arsip potongan gambar</small>
