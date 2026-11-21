@@ -382,7 +382,6 @@ function renderResults(blob){
 }
 
 if($('zipModalClose')) $('zipModalClose').addEventListener('click',closeZipModal);
-if($('zipModalSecondary')) $('zipModalSecondary').addEventListener('click',closeZipModal);
 if($('zipModalBackdrop')) $('zipModalBackdrop').addEventListener('click',closeZipModal);
 if($('zipModalDownload')) $('zipModalDownload').addEventListener('click',downloadZip);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeZipModal(); });
