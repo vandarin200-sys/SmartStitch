@@ -109,6 +109,11 @@ function updateFmtHint(){
 }
 function updateDirectionLabels(){
   var horizontal = $('direction').value === 'horizontal';
+  if($('directionHint')) $('directionHint').textContent = horizontal
+    ? (files.length === 2
+      ? 'Mode horizontal: 2 gambar — gambar ke-2 otomatis mengikuti ukuran gambar pertama.'
+      : 'Mode horizontal meresizing tinggi dan memotong sepanjang lebar.')
+    : 'Mode vertikal meresizing lebar dan memotong sepanjang tinggi.';
   if($('heightLabel')) $('heightLabel').textContent = horizontal ? 'Rough Output Width' : 'Rough Output Height';
   if($('heightHint')) $('heightHint').textContent = horizontal
     ? 'Perkiraan lebar tiap potongan (split_height).'
@@ -159,6 +164,7 @@ function addFiles(list){
 }
 function renderFiles(){
   var el=$('filelist'); el.innerHTML='';
+  updateDirectionLabels();
   if(!files.length) return;
   files.forEach(function(x){
     var d=document.createElement('div');
