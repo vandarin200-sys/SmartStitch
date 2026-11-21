@@ -161,24 +161,23 @@
           </section>
 
           <section class="ss-panel" id="panel-filename">
+            <p class="ss-lead">Tentukan nama arsip dan pola penomoran hasil potongan. Setiap perubahan langsung tercermin pada pratinjau di bawah, sehingga Anda dapat memastikan nama file sudah sesuai sebelum mengunduh.</p>
             <fieldset class="ss-group">
-              <legend>Nama File Output</legend>
+              <legend>Detail Penamaan</legend>
               <div class="ss-grid">
                 <div class="ss-field">
-                  <label for="zipName">Nama File ZIP</label>
+                  <label for="zipName">Nama Arsip ZIP</label>
                   <input type="text" id="zipName" maxlength="60" placeholder="smartstitch_slices"/>
-                  <div class="ss-hint">Tulis tanpa <code>.zip</code>; ekstensi ditambahkan otomatis. Contoh <code>Hasil_Jahitan</code> menjadi <code id="zipNamePreview">Hasil_Jahitan.zip</code>.</div>
+                  <p class="ss-copy">Arsip akan tersimpan sebagai <span class="ss-example" id="zipNamePreview">smartstitch_slices.zip</span>. Ekstensi ditambahkan otomatis, cukup tulis nama dasarnya.</p>
                 </div>
                 <div class="ss-field">
                   <label for="sliceStart">Nomor Awal Potongan</label>
                   <input type="text" id="sliceStart" inputmode="numeric" pattern="[0-9]*" maxlength="9" placeholder="01"/>
-                  <div class="ss-hint" id="sliceStartPreview">01.png · 02.png · 03.png</div>
+                  <p class="ss-copy">Urutan berkas dibuat otomatis, mulai dari <span class="ss-example" id="sliceStartPreview">01.png · 02.png · 03.png</span>.</p>
                 </div>
               </div>
             </fieldset>
-            <div class="ss-note" style="padding:0">
-              Nama ZIP hanya memakai huruf, angka, tanda hubung, dan garis bawah. Nomor awal potongan boleh ditulis dengan angka depan, misalnya <code>001</code> atau <code>0001</code>; nomor berikutnya mengikuti jumlah digit tersebut.
-            </div>
+            <p class="ss-note ss-note-inline">Nama arsip menggunakan huruf, angka, tanda hubung, dan garis bawah agar tetap kompatibel di semua perangkat. Angka depan seperti <code>001</code> akan dipertahankan, sehingga urutan berikutnya menjadi <code>002.png</code>, <code>003.png</code>, dan seterusnya.</p>
           </section>
 
           <section class="ss-panel" id="panel-about">
