@@ -50,6 +50,15 @@
             <fieldset class="ss-group">
               <legend>Input &amp; Output</legend>
               <div class="ss-field">
+                <label for="gridMode">Mode Tata Letak</label>
+                <select id="gridMode">
+                  <option value="custom">Kustom — tentukan ukuran potongan</option>
+                  <option value="count">Jumlah Gambar — tentukan jumlah potongan</option>
+                  <option value="resize">Resize — ubah ukuran gambar tanpa menggabungkan</option>
+                </select>
+                <div class="ss-hint">Pilih mode terlebih dahulu, lalu tambahkan gambar. Atur ukuran potongan, hasilkan grid otomatis, atau ubah setiap gambar secara individual tanpa penggabungan.</div>
+              </div>
+              <div class="ss-field" style="margin-top:16px">
                 <label>Gambar Input</label>
                 <div class="ss-drop" id="drop">
                   <strong>Tarik gambar ke sini, atau klik untuk memilih</strong>
@@ -84,15 +93,6 @@
                   <label for="quality">Kualitas File [1–100%]</label>
                   <input type="number" id="quality" min="1" max="100" value="100"/>
                   <div class="ss-hint">Berlaku untuk format JPG, WEBP, dan TIFF.</div>
-                </div>
-                <div class="ss-field">
-                  <label for="gridMode">Mode Tata Letak</label>
-                  <select id="gridMode">
-                    <option value="custom">Kustom — tentukan ukuran potongan</option>
-                    <option value="count">Jumlah Gambar — tentukan jumlah potongan</option>
-                    <option value="resize">Resize — ubah ukuran gambar tanpa menggabungkan</option>
-                  </select>
-                  <div class="ss-hint">Atur ukuran potongan, hasilkan grid otomatis, atau ubah setiap gambar secara individual tanpa penggabungan.</div>
                 </div>
                 <div class="ss-grid" id="customGridFields" style="grid-column:1/-1">
                   <div class="ss-field">
