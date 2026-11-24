@@ -51,7 +51,7 @@
             <fieldset class="ss-group">
               <legend>Pengaturan Umum</legend>
               <div class="ss-grid">
-                <div class="ss-field">
+                <div class="ss-field" id="directionWrap">
                   <label for="direction">Arah Penggabungan</label>
                   <select id="direction">
                     <option value="vertical">Vertikal — atas ke bawah</option>
@@ -64,6 +64,7 @@
                   <select id="outputType">
                     <option>.png</option><option>.jpg</option><option>.webp</option>
                     <option>.bmp</option><option>.tiff</option><option>.tga</option><option>.psd</option><option>.psb</option>
+                    <option>.ico</option>
                   </select>
                   <div class="ss-hint" id="fmtHint"></div>
                 </div>
@@ -77,8 +78,9 @@
                   <select id="gridMode">
                     <option value="custom">Kustom — tentukan ukuran potongan</option>
                     <option value="count">Jumlah Gambar — tentukan jumlah potongan</option>
+                    <option value="resize">Resize — ubah ukuran gambar tanpa menggabungkan</option>
                   </select>
-                  <div class="ss-hint">Atur ukuran potongan secara manual, atau biarkan sistem menyusun grid otomatis sesuai arah penggabungan.</div>
+                  <div class="ss-hint">Atur ukuran potongan, hasilkan grid otomatis, atau ubah setiap gambar secara individual tanpa penggabungan.</div>
                 </div>
                 <div class="ss-grid" id="customGridFields" style="grid-column:1/-1">
                   <div class="ss-field">
@@ -110,12 +112,58 @@
                     <div class="ss-hint" id="gridShapePreview">4 potongan → 2 baris × 2 kolom · vertikal</div>
                   </div>
                 </div>
+                <div class="ss-grid" id="resizeGridFields" style="display:none;grid-column:1/-1">
+                  <div class="ss-field">
+                    <label for="resizeWidth">Lebar (Width)</label>
+                    <input type="number" id="resizeWidth" min="1" max="10000" value="48"/>
+                    <div class="ss-hint">Lebar akhir setiap gambar dalam piksel.</div>
+                  </div>
+                  <div class="ss-field">
+                    <label for="resizeHeight">Tinggi (Height)</label>
+                    <input type="number" id="resizeHeight" min="1" max="10000" value="48"/>
+                    <div class="ss-hint">Tinggi akhir setiap gambar dalam piksel.</div>
+                  </div>
+                  <div class="ss-field">
+                    <label for="resizeMethod">Metode Resize</label>
+                    <select id="resizeMethod">
+                      <option value="fit">Fit — seluruh gambar masuk, tanpa pemotongan</option>
+                      <option value="fill">Fill — penuh, potong jika perlu</option>
+                      <option value="stretch">Stretch — paksa mengikuti dimensi</option>
+                    </select>
+                    <div class="ss-hint">Fit menjaga proporsi dengan area transparan bila perlu.</div>
+                  </div>
+                  <div class="ss-field" id="resizeModeNote">
+                    <label>Mode Mandiri</label>
+                    <div class="ss-hint">Setiap berkas diproses terpisah tanpa kanvas gabungan, stitching, atau potongan. Nama hasil: nama-asli-48x48.ext. Unduh per berkas atau semua dalam ZIP.</div>
+                  </div>
+                </div>
+                <div class="ss-grid" id="icoGridFields" style="display:none;grid-column:1/-1">
+                  <div class="ss-field" style="grid-column:1/-1">
+                    <label>Resolusi ICO</label>
+                    <div class="ss-check-row" id="icoSizes">
+                      <label class="ss-check"><input type="checkbox" value="16" checked="checked"/>16×16</label>
+                      <label class="ss-check"><input type="checkbox" value="32" checked="checked"/>32×32</label>
+                      <label class="ss-check"><input type="checkbox" value="48" checked="checked"/>48×48</label>
+                      <label class="ss-check"><input type="checkbox" value="64" checked="checked"/>64×64</label>
+                      <label class="ss-check"><input type="checkbox" value="128" checked="checked"/>128×128</label>
+                      <label class="ss-check"><input type="checkbox" value="256" checked="checked"/>256×256</label>
+                    </div>
+                    <div class="ss-hint">Semua resolusi terpilih disimpan dalam satu berkas ICO. Sisi maksimal 256 px; transparansi dipertahankan.</div>
+                  </div>
+                </div>
+                <div class="ss-grid" id="resizePreview" style="display:none;grid-column:1/-1">
+                  <div class="ss-field" style="grid-column:1/-1">
+                    <label>Pratinjau Resize</label>
+                    <div class="ss-resize-summary" id="resizeSummary"></div>
+                    <div class="ss-resize-table" id="resizeTable"></div>
+                  </div>
+                </div>
               </div>
             </fieldset>
           </section>
 
           <section class="ss-panel" id="panel-advanced">
-            <fieldset class="ss-group">
+            <fieldset class="ss-group" id="detectorGroup">
               <legend>Deteksi Potongan</legend>
               <div class="ss-grid">
                 <div class="ss-field">
@@ -168,7 +216,7 @@
                   <input type="text" id="zipName" maxlength="60" placeholder="SmartStitch"/>
                   <p class="ss-copy">Arsip akan tersimpan sebagai <span class="ss-example" id="zipNamePreview">SmartStitch.zip</span>. Ekstensi ditambahkan otomatis, cukup tulis nama dasarnya.</p>
                 </div>
-                <div class="ss-field">
+                <div class="ss-field" id="sliceStartField">
                   <label for="sliceStart">Nomor Awal Potongan</label>
                   <input type="text" id="sliceStart" inputmode="numeric" pattern="[0-9]*" maxlength="9" placeholder="01"/>
                   <p class="ss-copy">Urutan berkas dibuat otomatis, mulai dari <span class="ss-example" id="sliceStartPreview">01.png · 02.png · 03.png</span>.</p>
@@ -190,11 +238,12 @@
                 <li>Menggabungkan seluruh gambar menjadi satu kanvas vertikal atau horizontal.</li>
                 <li>Menentukan batas potongan dengan metode tetap atau deteksi piksel cerdas.</li>
                 <li>Mengekspor setiap potongan ke format pilihan dan mengemasnya dalam arsip ZIP.</li>
+                <li>Pada mode Resize, melewati penggabungan dan mengubah ukuran setiap gambar secara individual.</li>
               </ol>
 
               <h3>Hasil &amp; Kompatibilitas</h3>
                             <p>Setiap potongan diberi nama berurutan sesuai nomor awal yang dipilih. Format yang didukung meliputi
- <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, dan <code>PSB</code>. Pengaturan favorit dapat disimpan sebagai profil di browser Anda.</p>
+  <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, <code>PSB</code>, dan <code>ICO</code>. Berkas ICO dibuat sebagai kontainer ikon sejati dengan dukungan alpha dan beberapa resolusi. Pengaturan favorit dapat disimpan sebagai profil di browser Anda.</p>
 
               <h3>Privasi</h3>
               <p>Berkas hanya disimpan sementara selama proses berlangsung dan dihapus otomatis setelah arsip ZIP tersedia. Profil pengaturan tetap tersimpan secara lokal di browser.</p>
@@ -209,10 +258,10 @@
         </div>
         <pre class="ss-log" id="log"></pre>
         <div class="ss-preview" id="preview">
-          <h3>Arsip siap diunduh</h3>
+          <h3 id="previewTitle">Arsip siap diunduh</h3>
           <div class="ss-strip" id="strip"></div>
         </div>
-        <div class="ss-note" id="fmtNote">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB. Hasil dikemas dalam arsip ZIP dan berkas sementara dihapus otomatis setelah selesai.</div>
+        <div class="ss-note" id="fmtNote">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB, ICO. Hasil dikemas dalam ZIP dan setiap berkas juga dapat diunduh satu per satu.</div>
       </div>
       <div class="ss-foot">SmartStitch Web · 2026</div>
     </div>

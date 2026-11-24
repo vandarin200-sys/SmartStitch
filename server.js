@@ -88,6 +88,9 @@ function statusForError(err) {
     message.includes('Format tidak didukung') ||
     message.includes('Tidak ada gambar') ||
     message.includes('Ukuran') ||
+    message.includes('Dimensi') ||
+    message.includes('ICO') ||
+    message.includes('resize') ||
     message.includes('Terlalu banyak') ||
     message.includes('Gagal membaca') ||
     message.includes('tidak diizinkan') ||
@@ -349,6 +352,9 @@ async function handleProcess(req, res) {
 
     const settings = parseSettings(fields);
     const grid = settings.grid_mode === 'count' ? gridShape(settings.image_count, settings.direction) : null;
+    const shapeHeader = settings.grid_mode === 'resize'
+      ? settings.resize_width + 'x' + settings.resize_height + ' (' + settings.resize_method + ')'
+      : grid ? grid.rows + 'x' + grid.cols : '';
 
     if (!fromR2) {
       session = createUploadSession();
@@ -384,7 +390,7 @@ async function handleProcess(req, res) {
       'X-Job-Id': jobId,
       'X-Processed-Slices': String(result.outputs.length),
       'X-Grid-Mode': settings.grid_mode,
-      'X-Grid-Shape': grid ? grid.rows + 'x' + grid.cols : '',
+      'X-Grid-Shape': shapeHeader,
       'X-Input-Dirs': String(result.stats.groups),
       'X-Process-Ms': String(Date.now() - started),
       'X-Zip-Name': settings.zip_name,
