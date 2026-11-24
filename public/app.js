@@ -13,6 +13,29 @@ var currentZipName = 'SmartStitch.zip';
 var busy = false;
 var maxFiles = 200;
 
+var THEME_KEY = 'smartstitch_web_theme_v1';
+function currentTheme(){ return document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light'; }
+function applyTheme(theme,persist){
+  var dark=theme==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  var btn=document.getElementById('themeToggle');
+  if(btn){
+    var label=dark?'Ubah ke mode terang':'Ubah ke mode gelap';
+    btn.setAttribute('aria-label',label);
+    btn.setAttribute('title',label);
+    btn.setAttribute('aria-pressed',String(dark));
+  }
+  if(persist){ try{ localStorage.setItem(THEME_KEY,dark?'dark':'light'); }catch(e){} }
+}
+(function initTheme(){
+  var theme='';
+  try{ theme=localStorage.getItem(THEME_KEY)||''; }catch(e){}
+  if(theme!=='dark' && theme!=='light') theme=(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  applyTheme(theme,false);
+  var btn=document.getElementById('themeToggle');
+  if(btn) btn.addEventListener('click',function(){ applyTheme(currentTheme()==='dark'?'light':'dark',true); });
+})();
+
 var KEY = 'smartstitch_web_profiles_v1';
 var defaultSettings = {
   profile_name:'Settings Profile 1',
