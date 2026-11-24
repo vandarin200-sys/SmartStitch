@@ -80,6 +80,10 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
 #ss-root .ss-panel{display:none}
 #ss-root .ss-panel.active{display:block;animation:ssRise .3s both}
 #ss-root .ss-group{position:relative;border:1px solid var(--rule);border-radius:16px;padding:18px 20px 22px;margin:0 0 20px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.03)}
+#ss-root #panel-basic.active{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:20px;align-items:start;animation:ssRise .3s both}
+#ss-root #panel-basic .ss-group{margin:0}
+#ss-root .ss-mode-field{padding:14px 16px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff}
+#ss-root .ss-mode-field .ss-hint{margin-top:6px}
 #ss-root .ss-group legend{margin-left:12px;padding:0 8px;background:var(--sheet);font:700 13px/1.4 var(--sans);letter-spacing:.03em;color:var(--primary)}
 #ss-root .ss-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}
 #ss-root .ss-field{display:flex;flex-direction:column;gap:7px;min-width:0}
@@ -193,6 +197,7 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
 
 @media(max-width:900px){
   #ss-root .ss-card{grid-template-columns:1fr;grid-template-areas:"head" "tabs" "body" "status" "log" "preview" "note"}
+  #ss-root #panel-basic.active{grid-template-columns:1fr}
   #ss-root .ss-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--rule);overflow:visible}
   #ss-root .ss-tab{width:100%;flex-direction:row;justify-content:center;gap:6px;padding:10px 6px;min-height:44px;font-size:12px}
   #ss-root .ss-tab-icon{width:16px;height:16px}
@@ -213,6 +218,7 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
   #ss-root .ss-kicker{font-size:9px}
   #ss-root .ss-head p{font-size:12px}
   #ss-root .ss-body{padding:20px 16px}
+  #ss-root #panel-basic.active{gap:16px}
   #ss-root .ss-grid{grid-template-columns:1fr;gap:16px}
   #ss-root .ss-check-row{gap:4px 12px}
   #ss-root .ss-resize-row{grid-template-columns:minmax(0,1.4fr) minmax(76px,1fr) minmax(76px,1fr);gap:6px;padding:8px 10px;font-size:10px}
