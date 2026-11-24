@@ -4,235 +4,433 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>SmartStitch Web</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: '#2654ff',
+            'on-accent': '#ffffff',
+            success: '#14915c',
+            'on-success': '#ffffff',
+            warning: '#b25d09',
+            'on-warning': '#ffffff',
+            'border-subtle': '#d9dce5',
+            'border-strong': '#a8adbd',
+            'light-primary': '#111318',
+            'light-on-primary': '#ffffff',
+            'light-container-primary': '#e8eefd',
+            'light-on-container-primary': '#12308a',
+            'light-secondary': '#555b69',
+            'light-on-secondary': '#ffffff',
+            'light-container-secondary': '#f0f1f5',
+            'light-on-container-secondary': '#3a3f4b',
+            'light-tertiary': '#635f77',
+            'light-on-tertiary': '#ffffff',
+            'light-container-tertiary': '#f2eefb',
+            'light-on-container-tertiary': '#493f66',
+            'light-surface': '#f7f8fa',
+            'light-surface-container-lowest': '#ffffff',
+            'light-surface-container-low': '#f3f4f7',
+            'light-surface-container': '#eceef2',
+            'light-surface-container-high': '#e2e5eb',
+            'light-on-surface': '#111318',
+            'light-on-surface-variant': '#555b69',
+            'light-outline': '#858a98',
+            'light-outline-variant': '#c5c9d4',
+            'light-inverse-surface': '#2f3037',
+            'light-inverse-on-surface': '#f1f1f4',
+            'light-error': '#b3261e',
+            'light-on-error': '#ffffff',
+            'light-error-container': '#f9dedc',
+            'light-on-error-container': '#8c1d18',
+            'dark-primary': '#b9c7ff',
+            'dark-on-primary': '#253777',
+            'dark-container-primary': '#3b4c8b',
+            'dark-on-container-primary': '#dce3ff',
+            'dark-secondary': '#bdc2cf',
+            'dark-on-secondary': '#3c424f',
+            'dark-container-secondary': '#555b69',
+            'dark-on-container-secondary': '#dee0e8',
+            'dark-tertiary': '#d0c4e8',
+            'dark-on-tertiary': '#574a74',
+            'dark-container-tertiary': '#6e608b',
+            'dark-on-container-tertiary': '#eadffa',
+            'dark-surface': '#111318',
+            'dark-surface-container-lowest': '#0b0c10',
+            'dark-surface-container-low': '#1b1d23',
+            'dark-surface-container': '#25272e',
+            'dark-surface-container-high': '#2f313a',
+            'dark-on-surface': '#ececf1',
+            'dark-on-surface-variant': '#bdc2cf',
+            'dark-outline': '#9398a6',
+            'dark-outline-variant': '#696e7c',
+            'dark-inverse-surface': '#ececf1',
+            'dark-inverse-on-surface': '#2f3037',
+            'dark-error': '#f2b8b5',
+            'dark-on-error': '#8c1d18',
+            'dark-error-container': '#8c1d18',
+            'dark-on-error-container': '#f9dedc'
+          },
+          borderRadius: {
+            'gutter-xs': '4px',
+            'gutter-sm': '8px',
+            'gutter-md': '12px',
+            'gutter-lg': '16px',
+            'gutter-xl': '28px'
+          },
+          spacing: {
+            'gutter-xs': '4px',
+            'gutter-sm': '8px',
+            'gutter-md': '12px',
+            'gutter-lg': '16px',
+            'gutter-xl': '24px',
+            section: '32px',
+            'page-margin': '40px'
+          },
+          fontFamily: {
+            headline: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            title: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            body: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            label: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace']
+          },
+          fontSize: {
+            'headline-lg': ['3rem', { lineHeight: '1.05', letterSpacing: '-0.04em', fontWeight: '700' }],
+            'headline-md': ['2rem', { lineHeight: '1.15', letterSpacing: '-0.03em', fontWeight: '700' }],
+            'title-md': ['1.25rem', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '700' }],
+            'title-sm': ['1rem', { lineHeight: '1.4', letterSpacing: '-0.01em', fontWeight: '700' }],
+            'body-md': ['0.9375rem', { lineHeight: '1.6', fontWeight: '400' }],
+            'body-sm': ['0.8125rem', { lineHeight: '1.55', fontWeight: '400' }],
+            'label-lg': ['0.875rem', { lineHeight: '1.4', fontWeight: '600' }],
+            'label-md': ['0.8125rem', { lineHeight: '1.4', fontWeight: '600' }],
+            'label-sm': ['0.75rem', { lineHeight: '1.4', fontWeight: '600' }],
+            'mono-md': ['0.8125rem', { lineHeight: '1.5', fontWeight: '500' }],
+            'mono-sm': ['0.6875rem', { lineHeight: '1.45', fontWeight: '500' }]
+          },
+          transitionDuration: {
+            'state-change': '180ms',
+            'surface-enter': '240ms',
+            'surface-exit': '160ms'
+          }
+        }
+      }
+    };
+  </script>
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="relative min-h-screen overflow-x-hidden bg-light-surface font-body text-body-md text-light-on-surface antialiased" style="font-feature-settings:'ss01' on,'cv01' on,'cv11' on">
+  <div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(900px_480px_at_10%_-10%,rgba(38,84,255,0.10),transparent_60%),radial-gradient(700px_420px_at_100%_0%,rgba(20,145,92,0.08),transparent_55%)]"></div>
 
-<div class="ss-layout">
-  <main class="ss-main">
-
-    <div class="ss-app" id="ss-root">
-      <div class="ss-card">
-        <div class="ss-head">
-          <div class="ss-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="2.5" width="14" height="8" rx="1.6"/><rect x="5" y="13.5" width="14" height="8" rx="1.6"/>
-              <path d="M9 6.5h6M9 17.5h6"/>
-            </svg>
+  <div class="relative flex min-h-screen w-full flex-col">
+    <header class="sticky top-0 z-50 w-full border-b border-border-subtle bg-light-surface/95 backdrop-blur-md">
+      <div class="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-gutter-lg px-gutter-lg py-gutter-md md:px-page-margin">
+        <div class="flex min-w-0 items-center gap-gutter-md">
+          <div class="flex h-gutter-xl w-gutter-xl shrink-0 items-center justify-center rounded-gutter-lg bg-accent text-on-accent shadow-lg shadow-accent/20">
+            <span class="material-symbols-outlined text-[22px]" aria-hidden="true">auto_stitch</span>
           </div>
-          <div>
-            <h1>SmartStitch Web</h1>
-            <p>Gabungkan dan potong gambar dalam satu alur kerja yang rapi, aman, dan siap diunduh.</p>
+          <div class="min-w-0">
+            <p class="font-headline text-title-sm leading-tight text-light-primary">SmartStitch</p>
+            <p class="font-label text-label-sm text-light-on-surface-variant">Image stitching workspace</p>
           </div>
         </div>
 
-        <div class="ss-tabs" role="tablist">
-          <button class="ss-tab active" data-panel="basic">Dasar</button>
-          <button class="ss-tab" data-panel="advanced">Lanjutan</button>
-          <button class="ss-tab" data-panel="filename">Nama File</button>
-          <button class="ss-tab" data-panel="about">Tentang</button>
+        <nav role="tablist" aria-label="Navigasi pengaturan" class="ss-tabs grid grid-cols-4 gap-gutter-xs rounded-gutter-lg bg-light-surface-container p-gutter-xs md:inline-flex md:flex-nowrap md:gap-gutter-sm md:rounded-none md:bg-transparent md:p-0">
+          <button type="button" id="tab-basic" class="ss-tab flex items-center justify-center gap-gutter-sm rounded-gutter-sm border-b-2 border-border-subtle bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-label text-label-md text-light-primary transition-colors duration-state-change hover:bg-light-surface-container md:rounded-none md:border-b-2 md:px-gutter-lg md:py-gutter-md" role="tab" aria-selected="true" aria-controls="panel-basic" data-panel="basic" tabindex="0">
+            <span class="material-symbols-outlined hidden text-[18px] md:inline-flex" aria-hidden="true">photo_library</span>
+            Dasar
+          </button>
+          <button type="button" id="tab-advanced" class="ss-tab flex items-center justify-center gap-gutter-sm rounded-gutter-sm border-b-2 border-transparent px-gutter-md py-gutter-sm font-label text-label-md text-light-on-surface-variant transition-colors duration-state-change hover:bg-light-surface-container md:rounded-none md:border-b-2 md:px-gutter-lg md:py-gutter-md" role="tab" aria-selected="false" aria-controls="panel-advanced" data-panel="advanced" tabindex="-1">
+            <span class="material-symbols-outlined hidden text-[18px] md:inline-flex" aria-hidden="true">tune</span>
+            Lanjutan
+          </button>
+          <button type="button" id="tab-filename" class="ss-tab flex items-center justify-center gap-gutter-sm rounded-gutter-sm border-b-2 border-transparent px-gutter-md py-gutter-sm font-label text-label-md text-light-on-surface-variant transition-colors duration-state-change hover:bg-light-surface-container md:rounded-none md:border-b-2 md:px-gutter-lg md:py-gutter-md" role="tab" aria-selected="false" aria-controls="panel-filename" data-panel="filename" tabindex="-1">
+            <span class="material-symbols-outlined hidden text-[18px] md:inline-flex" aria-hidden="true">text_fields</span>
+            Nama File
+          </button>
+          <button type="button" id="tab-about" class="ss-tab flex items-center justify-center gap-gutter-sm rounded-gutter-sm border-b-2 border-transparent px-gutter-md py-gutter-sm font-label text-label-md text-light-on-surface-variant transition-colors duration-state-change hover:bg-light-surface-container md:rounded-none md:border-b-2 md:px-gutter-lg md:py-gutter-md" role="tab" aria-selected="false" aria-controls="panel-about" data-panel="about" tabindex="-1">
+            <span class="material-symbols-outlined hidden text-[18px] md:inline-flex" aria-hidden="true">info</span>
+            Tentang
+          </button>
+        </nav>
+
+        <button type="button" class="ss-start-trigger hidden items-center gap-gutter-sm rounded-gutter-lg bg-accent px-gutter-lg py-gutter-sm font-label text-label-md text-on-accent shadow-lg shadow-accent/20 transition-colors duration-state-change hover:bg-[#1c46e6] disabled:cursor-not-allowed disabled:opacity-50 md:inline-flex" aria-label="Proses gambar sekarang">
+          <span class="material-symbols-outlined text-[19px]" aria-hidden="true">play_arrow</span>
+          Mulai Proses
+        </button>
+      </div>
+    </header>
+
+    <main id="ss-root" class="mx-auto w-full max-w-[1440px] flex-1 px-gutter-lg pb-40 pt-section md:px-page-margin md:pb-32">
+      <div class="mb-section flex flex-col gap-gutter-md md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="mb-gutter-sm font-label text-label-sm uppercase tracking-[0.12em] text-accent">Workspace</p>
+          <h1 class="max-w-3xl font-headline text-headline-md text-light-primary md:text-headline-lg">Gabungkan, potong, dan ekspor gambar dalam satu alur kerja.</h1>
+          <p class="mt-gutter-md max-w-2xl text-body-sm text-light-on-surface-variant md:text-body-md">Pilih pengaturan, tambahkan gambar, lalu unduh hasilnya. Semua proses berjalan aman di server tanpa pemasangan aplikasi tambahan.</p>
         </div>
+        <div class="flex items-center gap-gutter-sm rounded-gutter-lg border border-border-subtle bg-light-surface-container-lowest px-gutter-md py-gutter-sm">
+          <span class="material-symbols-outlined text-[18px] text-success" aria-hidden="true">verified</span>
+          <span id="fileCountBadge" class="font-mono text-mono-sm text-light-on-surface-variant">0 berkas</span>
+        </div>
+      </div>
 
-        <div class="ss-body">
-          <section class="ss-panel active" id="panel-basic">
-            <fieldset class="ss-group">
-              <legend>Input &amp; Output</legend>
-              <div class="ss-field">
-                <label>Gambar Input</label>
-                <div class="ss-drop" id="drop">
-                  <strong>Tarik gambar ke sini, atau klik untuk memilih</strong>
-                  <span>Format didukung: PNG, JPG, JFIF, WEBP, BMP, TIFF, TGA, PSD, PSB · urutan berkas diatur otomatis</span>
-                  <input type="file" id="files" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.bmp,.tif,.tiff,.tga,.psd,.psb" multiple="multiple" hidden="hidden"/>
-                </div>
-                <div class="ss-filelist" id="filelist"></div>
-              </div>
-            </fieldset>
+      <section id="panel-basic" class="ss-panel flex flex-col gap-section" role="tabpanel" aria-labelledby="tab-basic">
+        <section class="ss-surface rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl">
+          <div class="mb-gutter-lg flex items-start gap-gutter-md">
+            <span class="material-symbols-outlined mt-0.5 text-[22px] text-accent" aria-hidden="true">image</span>
+            <div>
+              <h2 class="font-title text-title-md text-light-primary">Input &amp; Output</h2>
+              <p class="mt-gutter-xs text-body-sm text-light-on-surface-variant">Tambahkan gambar dan tentukan format hasil akhir.</p>
+            </div>
+          </div>
 
-            <fieldset class="ss-group">
-              <legend>Pengaturan Umum</legend>
-              <div class="ss-grid">
-                <div class="ss-field" id="directionWrap">
-                  <label for="direction">Arah Penggabungan</label>
-                  <select id="direction">
-                    <option value="vertical">Vertikal — atas ke bawah</option>
-                    <option value="horizontal">Horizontal — kiri ke kanan</option>
-                  </select>
-                  <div class="ss-hint" id="directionHint">Gambar disusun atas ke bawah dan dipotong mengikuti tinggi.</div>
-                </div>
-                <div class="ss-field">
-                  <label for="outputType">Format Output</label>
-                  <select id="outputType">
-                    <option>.png</option><option>.jpg</option><option>.webp</option>
-                    <option>.bmp</option><option>.tiff</option><option>.tga</option><option>.psd</option><option>.psb</option>
-                    <option>.ico</option>
-                  </select>
-                  <div class="ss-hint" id="fmtHint"></div>
-                </div>
-                <div class="ss-field" id="qualityWrap">
-                  <label for="quality">Kualitas File [1–100%]</label>
-                  <input type="number" id="quality" min="1" max="100" value="100"/>
-                  <div class="ss-hint">Berlaku untuk format JPG, WEBP, dan TIFF.</div>
-                </div>
-                <div class="ss-field">
-                  <label for="gridMode">Mode Tata Letak</label>
-                  <select id="gridMode">
-                    <option value="custom">Kustom — tentukan ukuran potongan</option>
-                    <option value="count">Jumlah Gambar — tentukan jumlah potongan</option>
-                    <option value="resize">Resize — ubah ukuran gambar tanpa menggabungkan</option>
-                  </select>
-                  <div class="ss-hint">Atur ukuran potongan, hasilkan grid otomatis, atau ubah setiap gambar secara individual tanpa penggabungan.</div>
-                </div>
-                <div class="ss-grid" id="customGridFields" style="grid-column:1/-1">
-                  <div class="ss-field">
-                    <label for="height" id="heightLabel">Perkiraan Tinggi Potongan</label>
-                    <input type="number" id="height" min="1" max="999999999" value="5000"/>
-                    <div class="ss-hint" id="heightHint">Perkiraan tinggi setiap potongan.</div>
-                  </div>
-                  <div class="ss-field">
-                    <label for="enforce" id="enforceLabel">Penyesuaian Ukuran</label>
-                    <select id="enforce">
-                      <option value="0">Tanpa penyesuaian</option>
-                      <option value="1">Ukuran seragam otomatis</option>
-                      <option value="2">Ukuran kustom</option>
-                    </select>
-                  </div>
-                  <div class="ss-field" id="customWrap" style="display:none">
-                    <label for="customWidth" id="customWidthLabel">Lebar Kustom (px)</label>
-                    <input type="number" id="customWidth" min="1" max="999999999" value="720"/>
-                  </div>
-                </div>
-                <div class="ss-grid" id="countGridFields" style="display:none;grid-column:1/-1">
-                  <div class="ss-field">
-                    <label for="imageCount">Jumlah Potongan</label>
-                    <input type="number" id="imageCount" min="1" max="1000" value="4"/>
-                    <div class="ss-hint">Jumlah gambar akhir yang dihasilkan dari kanvas gabungan.</div>
-                  </div>
-                  <div class="ss-field">
-                    <label>Pratinjau Tata Letak</label>
-                    <div class="ss-hint" id="gridShapePreview">4 potongan → 2 baris × 2 kolom · vertikal</div>
-                  </div>
-                </div>
-                <div class="ss-grid" id="resizeGridFields" style="display:none;grid-column:1/-1">
-                  <div class="ss-field">
-                    <label for="resizeWidth">Lebar (Width)</label>
-                    <input type="number" id="resizeWidth" min="1" max="10000" value="48"/>
-                    <div class="ss-hint">Lebar akhir setiap gambar dalam piksel.</div>
-                  </div>
-                  <div class="ss-field">
-                    <label for="resizeHeight">Tinggi (Height)</label>
-                    <input type="number" id="resizeHeight" min="1" max="10000" value="48"/>
-                    <div class="ss-hint">Tinggi akhir setiap gambar dalam piksel.</div>
-                  </div>
-                  <div class="ss-field">
-                    <label for="resizeMethod">Metode Resize</label>
-                    <select id="resizeMethod">
-                      <option value="fit">Fit — seluruh gambar masuk, tanpa pemotongan</option>
-                      <option value="fill">Fill — penuh, potong jika perlu</option>
-                      <option value="stretch">Stretch — paksa mengikuti dimensi</option>
-                    </select>
-                    <div class="ss-hint">Fit menjaga proporsi dengan area transparan bila perlu.</div>
-                  </div>
-                  <div class="ss-field" id="resizeModeNote">
-                    <label>Mode Mandiri</label>
-                    <div class="ss-hint">Setiap berkas diproses terpisah tanpa kanvas gabungan, stitching, atau potongan. Nama hasil: nama-asli-48x48.ext. Unduh per berkas atau semua dalam ZIP.</div>
-                  </div>
-                </div>
-                <div class="ss-grid" id="icoGridFields" style="display:none;grid-column:1/-1">
-                  <div class="ss-field" style="grid-column:1/-1">
-                    <label>Resolusi ICO</label>
-                    <div class="ss-check-row" id="icoSizes">
-                      <label class="ss-check"><input type="checkbox" value="16" checked="checked"/>16×16</label>
-                      <label class="ss-check"><input type="checkbox" value="32" checked="checked"/>32×32</label>
-                      <label class="ss-check"><input type="checkbox" value="48" checked="checked"/>48×48</label>
-                      <label class="ss-check"><input type="checkbox" value="64" checked="checked"/>64×64</label>
-                      <label class="ss-check"><input type="checkbox" value="128" checked="checked"/>128×128</label>
-                      <label class="ss-check"><input type="checkbox" value="256" checked="checked"/>256×256</label>
-                    </div>
-                    <div class="ss-hint">Semua resolusi terpilih disimpan dalam satu berkas ICO. Sisi maksimal 256 px; transparansi dipertahankan.</div>
-                  </div>
-                </div>
-                <div class="ss-grid" id="resizePreview" style="display:none;grid-column:1/-1">
-                  <div class="ss-field" style="grid-column:1/-1">
-                    <label>Pratinjau Resize</label>
-                    <div class="ss-resize-summary" id="resizeSummary"></div>
-                    <div class="ss-resize-table" id="resizeTable"></div>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </section>
+          <div class="ss-drop flex cursor-pointer flex-col items-center justify-center rounded-gutter-lg border-2 border-dashed border-border-strong bg-light-surface-container px-gutter-lg py-12 text-center transition-colors duration-state-change hover:border-accent hover:bg-light-container-primary" id="drop" role="button" tabindex="0" aria-label="Pilih atau tarik gambar ke sini">
+            <span class="material-symbols-outlined mb-gutter-md text-[40px] text-accent" aria-hidden="true">add_photo_alternate</span>
+            <strong class="font-label text-label-lg text-light-primary">Tarik gambar ke sini, atau klik untuk memilih</strong>
+            <span class="mt-gutter-sm max-w-xl text-body-sm text-light-on-surface-variant">Format didukung: PNG, JPG, JFIF, WEBP, BMP, TIFF, TGA, PSD, PSB · urutan berkas diatur otomatis</span>
+            <input type="file" id="files" accept="image/*,.png,.jpg,.jpeg,.jfif,.webp,.bmp,.tif,.tiff,.tga,.psd,.psb" multiple="multiple" class="hidden">
+          </div>
+          <div class="ss-filelist mt-gutter-md overflow-hidden rounded-gutter-sm border border-border-subtle bg-light-surface" id="filelist"></div>
+        </section>
 
-          <section class="ss-panel" id="panel-advanced">
-            <fieldset class="ss-group" id="detectorGroup">
-              <legend>Deteksi Potongan</legend>
-              <div class="ss-grid">
-                <div class="ss-field">
-                  <label for="detector">Metode Deteksi</label>
-                  <select id="detector">
-                    <option value="0">Potongan Tetap</option>
-                    <option value="1">Perbandingan Piksel Cerdas</option>
-                  </select>
-                  <div class="ss-hint">Potongan Tetap memotong pada jarak tertentu. Perbandingan Piksel Cerdas mencari baris kosong terdekat.</div>
-                </div>
-              </div>
-              <div class="ss-grid" id="smartOpts" style="margin-top:14px">
-                <div class="ss-field">
-                  <label for="sensitivity">Sensitivitas Deteksi [1–100%]</label>
-                  <input type="number" id="sensitivity" min="1" max="100" value="90"/>
-                </div>
-                <div class="ss-field">
-                  <label for="scanStep">Langkah Pemindaian (1–25 px)</label>
-                  <input type="number" id="scanStep" min="1" max="25" value="5"/>
-                </div>
-                <div class="ss-field">
-                  <label for="ignoreMargin">Margin Horizontal Diabaikan (px)</label>
-                  <input type="number" id="ignoreMargin" min="0" max="999999" value="5"/>
-                </div>
-              </div>
-            </fieldset>
+        <section class="ss-surface rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl">
+          <div class="mb-gutter-xl flex items-start gap-gutter-md">
+            <span class="material-symbols-outlined mt-0.5 text-[22px] text-accent" aria-hidden="true">tune</span>
+            <div>
+              <h2 class="font-title text-title-md text-light-primary">Pengaturan Umum</h2>
+              <p class="mt-gutter-xs text-body-sm text-light-on-surface-variant">Atur arah penggabungan, format, dan strategi pemotongan.</p>
+            </div>
+          </div>
 
-            <fieldset class="ss-group">
-              <legend>Profil Konfigurasi</legend>
-              <div class="ss-row-profile">
-                <select id="profileSelect"></select>
-                <button class="ss-btn small" id="addProfile">Tambah</button>
-                <button class="ss-btn small" id="delProfile">Hapus</button>
-              </div>
-              <div class="ss-field" style="margin-top:12px">
-                <label for="profileName">Nama Profil</label>
-                <input type="text" id="profileName"/>
-              </div>
-              <div class="ss-hint" style="margin-top:8px">Profil disimpan di browser agar pengaturan favorit dapat digunakan kembali.</div>
-            </fieldset>
-          </section>
+          <div class="grid grid-cols-1 gap-gutter-lg md:grid-cols-2">
+            <div class="flex flex-col gap-gutter-sm" id="directionWrap">
+              <label for="direction" class="font-label text-label-md text-light-on-surface">Arah Penggabungan</label>
+              <select id="direction" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <option value="vertical">Vertikal — atas ke bawah</option>
+                <option value="horizontal">Horizontal — kiri ke kanan</option>
+              </select>
+              <p class="ss-hint" id="directionHint">Gambar disusun atas ke bawah dan dipotong mengikuti tinggi.</p>
+            </div>
 
-          <section class="ss-panel" id="panel-filename">
-            <p class="ss-lead">Tentukan nama arsip dan pola penomoran hasil potongan. Setiap perubahan langsung tercermin pada pratinjau di bawah, sehingga Anda dapat memastikan nama file sudah sesuai sebelum mengunduh.</p>
-            <fieldset class="ss-group">
-              <legend>Detail Penamaan</legend>
-              <div class="ss-grid">
-                <div class="ss-field">
-                  <label for="zipName">Nama Arsip ZIP</label>
-                  <input type="text" id="zipName" maxlength="60" placeholder="SmartStitch"/>
-                  <p class="ss-copy">Arsip akan tersimpan sebagai <span class="ss-example" id="zipNamePreview">SmartStitch.zip</span>. Ekstensi ditambahkan otomatis, cukup tulis nama dasarnya.</p>
+            <div class="flex flex-col gap-gutter-sm">
+              <label for="outputType" class="font-label text-label-md text-light-on-surface">Format Output</label>
+              <select id="outputType" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <option value=".png">PNG</option>
+                <option value=".jpg">JPG</option>
+                <option value=".webp">WEBP</option>
+                <option value=".bmp">BMP</option>
+                <option value=".tiff">TIFF</option>
+                <option value=".tga">TGA</option>
+                <option value=".psd">PSD</option>
+                <option value=".psb">PSB</option>
+                <option value=".ico">ICO</option>
+              </select>
+              <p class="ss-hint" id="fmtHint">Format ini tidak menggunakan pengaturan kualitas.</p>
+            </div>
+
+            <div class="hidden flex flex-col gap-gutter-sm" id="qualityWrap">
+              <label for="quality" class="font-label text-label-md text-light-on-surface">Kualitas File [1–100%]</label>
+              <input type="number" id="quality" min="1" max="100" value="100" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              <p class="ss-hint">Berlaku untuk format JPG, WEBP, dan TIFF.</p>
+            </div>
+
+            <div class="flex flex-col gap-gutter-sm">
+              <label for="gridMode" class="font-label text-label-md text-light-on-surface">Mode Tata Letak</label>
+              <select id="gridMode" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <option value="custom">Kustom — tentukan ukuran potongan</option>
+                <option value="count">Jumlah Gambar — tentukan jumlah potongan</option>
+                <option value="resize">Resize — ubah ukuran gambar tanpa menggabungkan</option>
+              </select>
+              <p class="ss-hint">Atur ukuran potongan, hasilkan grid otomatis, atau ubah setiap gambar secara individual.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-gutter-lg md:col-span-2 md:grid-cols-2" id="customGridFields">
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="height" id="heightLabel" class="font-label text-label-md text-light-on-surface">Perkiraan Tinggi Potongan</label>
+                <input type="number" id="height" min="1" max="999999999" value="5000" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <p class="ss-hint" id="heightHint">Perkiraan tinggi setiap potongan.</p>
+              </div>
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="enforce" id="enforceLabel" class="font-label text-label-md text-light-on-surface">Penyesuaian Ukuran</label>
+                <select id="enforce" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                  <option value="0">Tanpa penyesuaian</option>
+                  <option value="1">Ukuran seragam otomatis</option>
+                  <option value="2">Ukuran kustom</option>
+                </select>
+              </div>
+              <div class="hidden flex flex-col gap-gutter-sm" id="customWrap">
+                <label for="customWidth" id="customWidthLabel" class="font-label text-label-md text-light-on-surface">Lebar Kustom (px)</label>
+                <input type="number" id="customWidth" min="1" max="999999999" value="720" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              </div>
+            </div>
+
+            <div class="hidden grid grid-cols-1 gap-gutter-lg md:col-span-2 md:grid-cols-2" id="countGridFields">
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="imageCount" class="font-label text-label-md text-light-on-surface">Jumlah Potongan</label>
+                <input type="number" id="imageCount" min="1" max="1000" value="4" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <p class="ss-hint">Jumlah gambar akhir yang dihasilkan dari kanvas gabungan.</p>
+              </div>
+              <div class="flex flex-col gap-gutter-sm">
+                <span class="font-label text-label-md text-light-on-surface">Pratinjau Tata Letak</span>
+                <div class="rounded-gutter-sm border border-border-subtle bg-light-surface px-gutter-md py-gutter-sm font-mono text-mono-sm text-light-on-surface-variant" id="gridShapePreview">4 potongan → 2 baris × 2 kolom · vertikal</div>
+              </div>
+            </div>
+
+            <div class="hidden grid grid-cols-1 gap-gutter-lg md:col-span-2 md:grid-cols-3" id="resizeGridFields">
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="resizeWidth" class="font-label text-label-md text-light-on-surface">Lebar (Width)</label>
+                <input type="number" id="resizeWidth" min="1" max="10000" value="48" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <p class="ss-hint">Lebar akhir setiap gambar dalam piksel.</p>
+              </div>
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="resizeHeight" class="font-label text-label-md text-light-on-surface">Tinggi (Height)</label>
+                <input type="number" id="resizeHeight" min="1" max="10000" value="48" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <p class="ss-hint">Tinggi akhir setiap gambar dalam piksel.</p>
+              </div>
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="resizeMethod" class="font-label text-label-md text-light-on-surface">Metode Resize</label>
+                <select id="resizeMethod" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                  <option value="fit">Fit — seluruh gambar masuk, tanpa pemotongan</option>
+                  <option value="fill">Fill — penuh, potong jika perlu</option>
+                  <option value="stretch">Stretch — paksa mengikuti dimensi</option>
+                </select>
+                <p class="ss-hint">Fit menjaga proporsi dengan area transparan bila perlu.</p>
+              </div>
+              <div class="flex flex-col gap-gutter-sm md:col-span-3" id="resizeModeNote">
+                <span class="font-label text-label-md text-light-on-surface">Mode Mandiri</span>
+                <p class="ss-hint">Setiap berkas diproses terpisah tanpa kanvas gabungan, stitching, atau potongan. Nama hasil: nama-asli-48x48.ext. Unduh per berkas atau semua dalam ZIP.</p>
+              </div>
+            </div>
+
+            <div class="hidden grid grid-cols-1 gap-gutter-lg md:col-span-2" id="icoGridFields">
+              <div class="flex flex-col gap-gutter-sm">
+                <span class="font-label text-label-md text-light-on-surface">Resolusi ICO</span>
+                <div class="ss-check-row flex flex-wrap gap-gutter-md" id="icoSizes">
+                  <label class="ss-check flex items-center gap-gutter-sm font-label text-label-md text-light-on-surface"><input type="checkbox" value="16" checked class="h-4 w-4 rounded-gutter-xs border-border-strong text-accent focus:ring-accent/20">16×16</label>
+                  <label class="ss-check flex items-center gap-gutter-sm font-label text-label-md text-light-on-surface"><input type="checkbox" value="32" checked class="h-4 w-4 rounded-gutter-xs border-border-strong text-accent focus:ring-accent/20">32×32</label>
+                  <label class="ss-check flex items-center gap-gutter-sm font-label text-label-md text-light-on-surface"><input type="checkbox" value="48" checked class="h-4 w-4 rounded-gutter-xs border-border-strong text-accent focus:ring-accent/20">48×48</label>
+                  <label class="ss-check flex items-center gap-gutter-sm font-label text-label-md text-light-on-surface"><input type="checkbox" value="64" checked class="h-4 w-4 rounded-gutter-xs border-border-strong text-accent focus:ring-accent/20">64×64</label>
+                  <label class="ss-check flex items-center gap-gutter-sm font-label text-label-md text-light-on-surface"><input type="checkbox" value="128" checked class="h-4 w-4 rounded-gutter-xs border-border-strong text-accent focus:ring-accent/20">128×128</label>
+                  <label class="ss-check flex items-center gap-gutter-sm font-label text-label-md text-light-on-surface"><input type="checkbox" value="256" checked class="h-4 w-4 rounded-gutter-xs border-border-strong text-accent focus:ring-accent/20">256×256</label>
                 </div>
-                <div class="ss-field" id="sliceStartField">
-                  <label for="sliceStart">Nomor Awal Potongan</label>
-                  <input type="text" id="sliceStart" inputmode="numeric" pattern="[0-9]*" maxlength="9" placeholder="01"/>
-                  <p class="ss-copy">Urutan berkas dibuat otomatis, mulai dari <span class="ss-example" id="sliceStartPreview">01.png · 02.png · 03.png</span>.</p>
-                </div>
+                <p class="ss-hint">Semua resolusi terpilih disimpan dalam satu berkas ICO. Sisi maksimal 256 px; transparansi dipertahankan.</p>
               </div>
-            </fieldset>
-            <p class="ss-note ss-note-inline">Nama arsip menggunakan huruf, angka, tanda hubung, dan garis bawah agar tetap kompatibel di semua perangkat. Angka depan seperti <code>001</code> akan dipertahankan, sehingga urutan berikutnya menjadi <code>002.png</code>, <code>003.png</code>, dan seterusnya.</p>
-          </section>
+            </div>
 
-          <section class="ss-panel" id="panel-about">
-            <div class="ss-about">
-              <h3>Tentang SmartStitch</h3>
-              <p><strong>SmartStitch Web</strong> menghadirkan alur kerja penggabungan dan pemotongan gambar dari aplikasi desktop SmartStitch ke dalam browser. Seluruh proses berjalan di server, sehingga perangkat Anda tidak memerlukan aplikasi tambahan.</p>
+            <div class="hidden grid grid-cols-1 gap-gutter-sm md:col-span-2" id="resizePreview">
+              <span class="font-label text-label-md text-light-on-surface">Pratinjau Resize</span>
+              <div class="ss-resize-summary rounded-gutter-sm border border-light-outline-variant bg-light-container-primary px-gutter-md py-gutter-sm font-label text-label-md text-light-on-container-primary" id="resizeSummary"></div>
+              <div class="ss-resize-table overflow-hidden rounded-gutter-sm border border-border-subtle bg-light-surface" id="resizeTable"></div>
+            </div>
+          </div>
+        </section>
+      </section>
 
-              <h3>Cara Kerja</h3>
-              <ol>
+      <section id="panel-advanced" class="ss-panel hidden flex flex-col gap-section" role="tabpanel" aria-labelledby="tab-advanced">
+        <section class="ss-surface rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl" id="detectorGroup">
+          <div class="mb-gutter-lg flex items-start gap-gutter-md">
+            <span class="material-symbols-outlined mt-0.5 text-[22px] text-accent" aria-hidden="true">graphic_eq</span>
+            <div>
+              <h2 class="font-title text-title-md text-light-primary">Deteksi Potongan</h2>
+              <p class="mt-gutter-xs text-body-sm text-light-on-surface-variant">Pilih cara menentukan batas antar potongan.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-gutter-lg">
+            <div class="flex flex-col gap-gutter-sm">
+              <label for="detector" class="font-label text-label-md text-light-on-surface">Metode Deteksi</label>
+              <select id="detector" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+                <option value="0">Potongan Tetap</option>
+                <option value="1">Perbandingan Piksel Cerdas</option>
+              </select>
+              <p class="ss-hint">Potongan Tetap memotong pada jarak tertentu. Perbandingan Piksel Cerdas mencari baris kosong terdekat.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-gutter-lg md:grid-cols-3" id="smartOpts">
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="sensitivity" class="font-label text-label-md text-light-on-surface">Sensitivitas Deteksi [1–100%]</label>
+                <input type="number" id="sensitivity" min="1" max="100" value="90" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              </div>
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="scanStep" class="font-label text-label-md text-light-on-surface">Langkah Pemindaian (1–25 px)</label>
+                <input type="number" id="scanStep" min="1" max="25" value="5" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              </div>
+              <div class="flex flex-col gap-gutter-sm">
+                <label for="ignoreMargin" class="font-label text-label-md text-light-on-surface">Margin Horizontal Diabaikan (px)</label>
+                <input type="number" id="ignoreMargin" min="0" max="999999" value="5" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ss-surface rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl">
+          <div class="mb-gutter-lg flex items-start gap-gutter-md">
+            <span class="material-symbols-outlined mt-0.5 text-[22px] text-accent" aria-hidden="true">bookmark</span>
+            <div>
+              <h2 class="font-title text-title-md text-light-primary">Profil Konfigurasi</h2>
+              <p class="mt-gutter-xs text-body-sm text-light-on-surface-variant">Simpan pengaturan favorit agar dapat dipakai kembali.</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-gutter-md md:flex-row md:items-end">
+            <div class="flex flex-1 flex-col gap-gutter-sm">
+              <label for="profileSelect" class="font-label text-label-md text-light-on-surface">Profil Tersimpan</label>
+              <select id="profileSelect" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20"></select>
+            </div>
+            <div class="flex flex-col gap-gutter-sm md:w-64">
+              <label for="profileName" class="font-label text-label-md text-light-on-surface">Nama Profil</label>
+              <input type="text" id="profileName" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+            </div>
+            <div class="flex gap-gutter-sm">
+              <button type="button" id="addProfile" class="rounded-gutter-sm border border-border-strong bg-light-surface-container-lowest px-gutter-lg py-gutter-sm font-label text-label-md text-light-primary transition-colors duration-state-change hover:bg-light-container-primary">Tambah</button>
+              <button type="button" id="delProfile" class="rounded-gutter-sm border border-border-strong bg-light-surface-container-lowest px-gutter-lg py-gutter-sm font-label text-label-md text-light-error transition-colors duration-state-change hover:bg-light-error-container">Hapus</button>
+            </div>
+          </div>
+          <p class="ss-hint mt-gutter-md">Profil disimpan di browser agar pengaturan favorit dapat digunakan kembali.</p>
+        </section>
+      </section>
+
+      <section id="panel-filename" class="ss-panel hidden flex flex-col gap-section" role="tabpanel" aria-labelledby="tab-filename">
+        <section class="ss-surface rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl">
+          <div class="mb-gutter-lg flex items-start gap-gutter-md">
+            <span class="material-symbols-outlined mt-0.5 text-[22px] text-accent" aria-hidden="true">text_fields</span>
+            <div>
+              <h2 class="font-title text-title-md text-light-primary">Detail Penamaan</h2>
+              <p class="mt-gutter-xs text-body-sm text-light-on-surface-variant">Tentukan nama arsip dan pola penomoran hasil potongan.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-gutter-lg md:grid-cols-2">
+            <div class="flex flex-col gap-gutter-sm">
+              <label for="zipName" class="font-label text-label-md text-light-on-surface">Nama Arsip ZIP</label>
+              <input type="text" id="zipName" maxlength="60" placeholder="SmartStitch" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              <p class="ss-hint">Arsip tersimpan sebagai <span class="ss-example rounded-gutter-xs bg-light-container-primary px-gutter-sm font-mono text-mono-sm text-light-on-container-primary" id="zipNamePreview">SmartStitch.zip</span>. Ekstensi ditambahkan otomatis.</p>
+            </div>
+            <div class="flex flex-col gap-gutter-sm" id="sliceStartField">
+              <label for="sliceStart" class="font-label text-label-md text-light-on-surface">Nomor Awal Potongan</label>
+              <input type="text" id="sliceStart" inputmode="numeric" pattern="[0-9]*" maxlength="9" placeholder="01" class="w-full rounded-gutter-sm border-border-strong bg-light-surface-container-lowest px-gutter-md py-gutter-sm font-body text-body-md text-light-primary focus:border-accent focus:ring-accent/20">
+              <p class="ss-hint">Urutan berkas otomatis, mulai dari <span class="ss-example rounded-gutter-xs bg-light-container-primary px-gutter-sm font-mono text-mono-sm text-light-on-container-primary" id="sliceStartPreview">01.png · 02.png · 03.png</span>.</p>
+            </div>
+          </div>
+        </section>
+        <div class="rounded-gutter-lg border border-border-subtle bg-light-container-primary px-gutter-lg py-gutter-md font-body text-body-sm text-light-on-container-primary">
+          Nama arsip menggunakan huruf, angka, tanda hubung, dan garis bawah. Angka depan seperti <code class="rounded-gutter-xs bg-light-surface-container-lowest px-gutter-sm font-mono text-mono-sm">001</code> dipertahankan, sehingga urutan berikutnya menjadi <code class="rounded-gutter-xs bg-light-surface-container-lowest px-gutter-sm font-mono text-mono-sm">002.png</code>, <code class="rounded-gutter-xs bg-light-surface-container-lowest px-gutter-sm font-mono text-mono-sm">003.png</code>, dan seterusnya.
+        </div>
+      </section>
+
+      <section id="panel-about" class="ss-panel hidden flex flex-col gap-section" role="tabpanel" aria-labelledby="tab-about">
+        <section class="ss-surface rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl">
+          <div class="mb-gutter-xl flex items-start gap-gutter-md">
+            <span class="material-symbols-outlined mt-0.5 text-[22px] text-accent" aria-hidden="true">info</span>
+            <div>
+              <h2 class="font-title text-title-md text-light-primary">Tentang SmartStitch</h2>
+              <p class="mt-gutter-xs text-body-sm text-light-on-surface-variant">Versi web dari alur kerja penggabungan dan pemotongan gambar SmartStitch.</p>
+            </div>
+          </div>
+          <div class="ss-about grid grid-cols-1 gap-gutter-lg md:grid-cols-2">
+            <div class="rounded-gutter-lg border border-border-subtle bg-light-surface p-gutter-lg">
+              <h3 class="mb-gutter-sm font-label text-label-sm uppercase tracking-[0.1em] text-accent">Cara Kerja</h3>
+              <ol class="list-decimal space-y-gutter-sm pl-gutter-lg text-body-sm text-light-on-surface-variant">
                 <li>Mengumpulkan berkas gambar dan mengurutkannya secara otomatis.</li>
                 <li>Menyelaraskan ukuran gambar sesuai pengaturan yang dipilih.</li>
                 <li>Menggabungkan seluruh gambar menjadi satu kanvas vertikal atau horizontal.</li>
@@ -240,58 +438,86 @@
                 <li>Mengekspor setiap potongan ke format pilihan dan mengemasnya dalam arsip ZIP.</li>
                 <li>Pada mode Resize, melewati penggabungan dan mengubah ukuran setiap gambar secara individual.</li>
               </ol>
-
-              <h3>Hasil &amp; Kompatibilitas</h3>
-                            <p>Setiap potongan diberi nama berurutan sesuai nomor awal yang dipilih. Format yang didukung meliputi
-  <code>PNG</code>, <code>JPG</code>, <code>JFIF</code>, <code>WEBP</code>, <code>BMP</code>, <code>TIFF</code>, <code>TGA</code>, <code>PSD</code>, <code>PSB</code>, dan <code>ICO</code>. Berkas ICO dibuat sebagai kontainer ikon sejati dengan dukungan alpha dan beberapa resolusi. Pengaturan favorit dapat disimpan sebagai profil di browser Anda.</p>
-
-              <h3>Privasi</h3>
-              <p>Berkas hanya disimpan sementara selama proses berlangsung dan dihapus otomatis setelah arsip ZIP tersedia. Profil pengaturan tetap tersimpan secara lokal di browser.</p>
             </div>
-          </section>
-        </div>
+            <div class="flex flex-col gap-gutter-lg">
+              <div class="rounded-gutter-lg border border-border-subtle bg-light-surface p-gutter-lg">
+                <h3 class="mb-gutter-sm font-label text-label-sm uppercase tracking-[0.1em] text-accent">Hasil &amp; Kompatibilitas</h3>
+                <p class="text-body-sm text-light-on-surface-variant">Format yang didukung meliputi <code class="font-mono text-mono-sm">PNG</code>, <code class="font-mono text-mono-sm">JPG</code>, <code class="font-mono text-mono-sm">JFIF</code>, <code class="font-mono text-mono-sm">WEBP</code>, <code class="font-mono text-mono-sm">BMP</code>, <code class="font-mono text-mono-sm">TIFF</code>, <code class="font-mono text-mono-sm">TGA</code>, <code class="font-mono text-mono-sm">PSD</code>, <code class="font-mono text-mono-sm">PSB</code>, dan <code class="font-mono text-mono-sm">ICO</code>. Berkas ICO dibuat sebagai kontainer ikon sejati dengan dukungan alpha dan beberapa resolusi.</p>
+              </div>
+              <div class="rounded-gutter-lg border border-border-subtle bg-light-surface p-gutter-lg">
+                <h3 class="mb-gutter-sm font-label text-label-sm uppercase tracking-[0.1em] text-accent">Privasi</h3>
+                <p class="text-body-sm text-light-on-surface-variant">Berkas hanya disimpan sementara selama proses berlangsung dan dihapus otomatis setelah arsip ZIP tersedia. Profil pengaturan tetap tersimpan secara lokal di browser.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
 
-        <div class="ss-status">
-          <div class="msg" id="status">Siap memproses gambar.</div>
-          <div class="ss-bar"><i id="bar"></i></div>
-          <button class="ss-btn primary" id="start">Proses Sekarang</button>
+      <pre id="log" class="ss-log hidden mx-auto w-full max-w-[1100px] overflow-auto rounded-gutter-lg border border-[#1e293b] bg-[#0b1220] p-gutter-lg font-mono text-mono-sm leading-relaxed text-[#a5f3fc]"></pre>
+
+      <section id="preview" class="ss-preview hidden mx-auto mt-section w-full max-w-[1100px] rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-lg shadow-sm md:p-gutter-xl">
+        <div class="mb-gutter-lg flex items-center gap-gutter-sm">
+          <span class="material-symbols-outlined text-[22px] text-success" aria-hidden="true">download</span>
+          <h3 id="previewTitle" class="font-title text-title-md text-light-primary">Arsip siap diunduh</h3>
         </div>
-        <pre class="ss-log" id="log"></pre>
-        <div class="ss-preview" id="preview">
-          <h3 id="previewTitle">Arsip siap diunduh</h3>
-          <div class="ss-strip" id="strip"></div>
+        <div class="ss-strip flex gap-gutter-md overflow-x-auto pb-gutter-sm" id="strip"></div>
+      </section>
+
+      <p id="fmtNote" class="mx-auto mt-section max-w-[1100px] text-center font-body text-body-sm text-light-on-surface-variant">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB, ICO. Hasil dikemas dalam ZIP dan setiap berkas juga dapat diunduh satu per satu.</p>
+    </main>
+
+    <div class="fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-light-surface/95 backdrop-blur-md" aria-label="Status dan aksi proses">
+      <div class="mx-auto flex w-full max-w-[1440px] flex-col gap-gutter-md px-gutter-lg py-gutter-md md:flex-row md:items-center md:px-page-margin">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-gutter-sm">
+            <span class="material-symbols-outlined shrink-0 text-[18px] text-accent" aria-hidden="true">pending_actions</span>
+            <p id="status" class="truncate font-label text-label-md text-light-on-surface">Siap memproses gambar.</p>
+          </div>
+          <div class="mt-gutter-sm h-2 w-full overflow-hidden rounded-full bg-light-surface-container-high">
+            <div id="bar" class="h-full w-0 rounded-full bg-accent transition-[width] duration-500"></div>
+          </div>
+          <p id="progressLabel" class="mt-gutter-xs font-mono text-mono-sm text-light-on-surface-variant">0%</p>
         </div>
-        <div class="ss-note" id="fmtNote">Format output: PNG, JPG, WEBP, BMP, TIFF, TGA, PSD, PSB, ICO. Hasil dikemas dalam ZIP dan setiap berkas juga dapat diunduh satu per satu.</div>
+        <button type="button" id="start" class="ss-start-trigger inline-flex w-full items-center justify-center gap-gutter-sm rounded-gutter-lg bg-accent px-gutter-xl py-gutter-md font-label text-label-md text-on-accent shadow-lg shadow-accent/20 transition-colors duration-state-change hover:bg-[#1c46e6] disabled:cursor-not-allowed disabled:opacity-50 md:w-auto">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">play_arrow</span>
+          Proses Sekarang
+        </button>
       </div>
-      <div class="ss-foot">SmartStitch Web · 2026</div>
     </div>
-    <div class="ss-toast" id="toast"></div>
+  </div>
 
-    <div class="ss-modal" id="zipModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="zipModalTitle">
-      <div class="ss-modal-backdrop" id="zipModalBackdrop"></div>
-      <div class="ss-modal-card" role="document">
-        <button class="ss-modal-close" id="zipModalClose" type="button" aria-label="Tutup">&times;</button>
-        <h3 id="zipModalTitle">Proses Selesai</h3>
-        <p>Arsip ZIP Anda siap disimpan.</p>
-        <div class="ss-modal-file">
-          <span class="ss-modal-file-text">
-            <strong id="zipModalName">SmartStitch.zip</strong>
-            <small id="zipModalMeta">Arsip potongan gambar</small>
+  <div id="toast" role="status" aria-live="polite" class="ss-toast hidden fixed bottom-28 left-1/2 z-[60] max-w-[calc(100%-24px)] -translate-x-1/2 rounded-gutter-lg border border-border-subtle bg-light-inverse-surface px-gutter-lg py-gutter-md text-center font-label text-label-md text-light-inverse-on-surface shadow-2xl md:bottom-32"></div>
+
+  <div id="zipModal" class="ss-modal hidden fixed inset-0 z-[70] flex items-center justify-center p-gutter-lg" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="zipModalTitle">
+    <div class="ss-modal-backdrop absolute inset-0 bg-light-inverse-surface/70 backdrop-blur-sm" id="zipModalBackdrop"></div>
+    <div class="ss-modal-card relative w-full max-w-[440px] rounded-gutter-xl border border-border-subtle bg-light-surface-container-lowest p-gutter-xl text-center shadow-2xl" role="document">
+      <button type="button" class="ss-modal-close absolute right-gutter-md top-gutter-md rounded-gutter-sm p-gutter-sm text-light-on-surface-variant transition-colors duration-state-change hover:bg-light-surface-container hover:text-light-primary" id="zipModalClose" aria-label="Tutup">
+        <span class="material-symbols-outlined text-[22px]" aria-hidden="true">close</span>
+      </button>
+      <div class="mx-auto mb-gutter-md flex h-14 w-14 items-center justify-center rounded-gutter-lg bg-light-container-primary text-accent">
+        <span class="material-symbols-outlined text-[28px]" aria-hidden="true">folder_zip</span>
+      </div>
+      <h3 id="zipModalTitle" class="font-title text-title-md text-light-primary">Proses Selesai</h3>
+      <p id="zipModalMeta" class="mt-gutter-sm text-body-sm text-light-on-surface-variant">Arsip potongan gambar</p>
+      <div class="ss-modal-file mt-gutter-lg flex items-center gap-gutter-md rounded-gutter-lg border border-border-subtle bg-light-surface p-gutter-md text-left">
+        <span class="material-symbols-outlined shrink-0 text-[24px] text-success" aria-hidden="true">description</span>
+        <span class="ss-modal-file-text min-w-0">
+          <strong id="zipModalName" class="block break-all font-label text-label-md text-light-primary">SmartStitch.zip</strong>
+          <small class="font-mono text-mono-sm text-light-on-surface-variant">Arsip siap diunduh</small>
+        </span>
+      </div>
+      <div class="ss-modal-actions mt-gutter-lg">
+        <button type="button" id="zipModalDownload" class="ss-zip-download flex w-full items-center gap-gutter-md rounded-gutter-lg bg-light-primary px-gutter-lg py-gutter-md text-left text-light-on-primary transition-transform duration-state-change hover:-translate-y-0.5">
+          <span class="ss-zip-download-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-gutter-sm bg-light-on-primary/10 text-light-on-primary">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">download</span>
           </span>
-        </div>
-        <div class="ss-modal-actions">
-          <button class="ss-zip-download" id="zipModalDownload" type="button">
-            <span class="ss-zip-download-icon">&#8681;</span>
-            <span class="ss-zip-download-label">Unduh Arsip ZIP<small>Klik untuk menyimpan ke perangkat</small></span>
-            <span class="ss-zip-download-arrow">&#8594;</span>
-          </button>
-        </div>
+          <span class="ss-zip-download-label flex-1 font-label text-label-md">Unduh Arsip ZIP<small class="font-body text-body-sm text-light-on-primary/70">Klik untuk menyimpan ke perangkat</small></span>
+          <span class="ss-zip-download-arrow material-symbols-outlined text-[20px]" aria-hidden="true">arrow_forward</span>
+        </button>
       </div>
     </div>
+  </div>
 
-  </main>
-</div>
-
-<script src="./app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
