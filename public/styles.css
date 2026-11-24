@@ -49,8 +49,8 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
 #ss-root a{color:inherit;text-decoration:none;border:0}
 #ss-root button,#ss-root input,#ss-root select,#ss-root textarea{font-family:inherit}
 .ss-widget-host{padding:0 !important;margin:0 !important;border:0 !important;background:transparent !important;box-shadow:none !important}
-#ss-root .ss-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr);
-  grid-template-areas:"head" "tabs" "body" "status" "log" "preview" "note";
+#ss-root .ss-card{position:relative;display:grid;grid-template-columns:232px minmax(0,1fr);
+  grid-template-areas:"head head" "tabs body" "status status" "log log" "preview preview" "note note";
   background:var(--sheet);border:1px solid var(--rule);border-radius:var(--radius);
   box-shadow:0 28px 70px -38px rgba(15,23,42,.35),0 2px 6px rgba(15,23,42,.03);
   animation:ssRise .6s cubic-bezier(.2,.8,.2,1) both}
@@ -69,14 +69,13 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
 #ss-root .ss-kicker:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
 #ss-root .ss-head h1{font-family:var(--sans);font-size:clamp(28px,4vw,38px);line-height:1.05;letter-spacing:-.03em;color:var(--headline);font-weight:700}
 #ss-root .ss-head p{margin-top:9px;font:14px/1.55 var(--sans);color:var(--muted)}
-#ss-root .ss-tabs{grid-area:tabs;display:flex;align-items:center;gap:6px;padding:14px 34px;background:#fbfcfe;border-bottom:1px solid var(--rule)}
-#ss-root .ss-tab{display:inline-flex;align-items:center;justify-content:center;gap:9px;appearance:none;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--muted);cursor:pointer;text-align:center;white-space:nowrap;
-  padding:11px 16px;font:600 13px/1.3 var(--sans);transition:.18s}
-#ss-root .ss-tab-icon{display:none;width:18px;height:18px;flex:0 0 auto}
+#ss-root .ss-tabs{grid-area:tabs;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:18px 14px;background:#fbfcfe;border-right:1px solid var(--rule)}
+#ss-root .ss-tab{display:flex;align-items:center;justify-content:flex-start;gap:10px;appearance:none;border:0;border-radius:12px;background:transparent;color:var(--muted);cursor:pointer;text-align:left;white-space:nowrap;
+  padding:12px 13px;font:600 13px/1.3 var(--sans);transition:.18s}
+#ss-root .ss-tab-icon{display:block;width:18px;height:18px;flex:0 0 auto}
 #ss-root .ss-tab:hover{color:var(--headline);background:#f1f5f9}
-#ss-root .ss-tab.active{color:var(--primary);background:#eef2ff;border-color:#c7d2fe;border-bottom-color:var(--primary);box-shadow:0 1px 2px rgba(79,70,229,.08)}
+#ss-root .ss-tab.active{color:var(--primary);background:#eef2ff;box-shadow:inset 3px 0 0 var(--primary)}
 #ss-root .ss-tab:focus-visible{outline:3px solid rgba(79,70,229,.22);outline-offset:2px}
-@media(min-width:901px){#ss-root .ss-tab-icon{display:block}}
 #ss-root .ss-body{grid-area:body;padding:34px 36px;background:var(--sheet);min-width:0;animation:ssRise .5s .08s both}
 #ss-root .ss-panel{display:none}
 #ss-root .ss-panel.active{display:block;animation:ssRise .3s both}
@@ -194,9 +193,10 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
 
 @media(max-width:900px){
   #ss-root .ss-card{grid-template-columns:1fr;grid-template-areas:"head" "tabs" "body" "status" "log" "preview" "note"}
-  #ss-root .ss-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 12px;overflow:visible}
-  #ss-root .ss-tab{width:100%;padding:10px 6px;min-height:44px;font-size:12px}
-  #ss-root .ss-tab.active{box-shadow:none}
+  #ss-root .ss-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--rule);overflow:visible}
+  #ss-root .ss-tab{width:100%;flex-direction:row;justify-content:center;gap:6px;padding:10px 6px;min-height:44px;font-size:12px}
+  #ss-root .ss-tab-icon{width:16px;height:16px}
+  #ss-root .ss-tab.active{box-shadow:inset 0 0 0 1px #c7d2fe}
   #ss-root .ss-head{grid-template-columns:auto 1fr;padding:24px}
   #ss-root .ss-body{padding:26px 24px}
   #ss-root .ss-status{grid-template-columns:minmax(160px,1fr) auto}
@@ -237,6 +237,7 @@ h1,h2,h3,h4,p,ol,ul{margin:0}
 }
 @media(max-width:380px){
   #ss-root .ss-head h1{font-size:21px}
-  #ss-root .ss-tab{font-size:11px;padding:9px 4px}
+  #ss-root .ss-tab{gap:4px;font-size:10px;padding:9px 3px}
+  #ss-root .ss-tab-icon{width:15px;height:15px}
   #ss-root .ss-shot{width:102px}
 }
