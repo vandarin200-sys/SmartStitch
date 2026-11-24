@@ -410,9 +410,13 @@ function updateResizePreview(){
 
 Array.prototype.forEach.call(document.querySelectorAll('.ss-tab'),function(btn){
   btn.addEventListener('click',function(){
-    Array.prototype.forEach.call(document.querySelectorAll('.ss-tab'),function(b){b.classList.remove('active');});
+    Array.prototype.forEach.call(document.querySelectorAll('.ss-tab'),function(b){
+      var active=b===btn;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-selected',String(active));
+      b.setAttribute('tabindex',active?'0':'-1');
+    });
     Array.prototype.forEach.call(document.querySelectorAll('.ss-panel'),function(p){p.classList.remove('active');});
-    btn.classList.add('active');
     $('panel-'+btn.dataset.panel).classList.add('active');
   });
 });
